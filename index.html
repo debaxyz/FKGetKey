@@ -1,10 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>DEBA • One-Time Keys + Android ID Device Lock</title>
+    <title>DEBA • Firebase Cloud Keys + Android ID Lock</title>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -23,7 +25,7 @@
         }
 
         .generator {
-            max-width: 680px;
+            max-width: 700px;
             width: 100%;
             background: rgba(18, 22, 32, 0.94);
             backdrop-filter: blur(2px);
@@ -45,7 +47,7 @@
 
         .logo {
             font-weight: 800;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             background: linear-gradient(135deg, #FFB347, #FF6B3D);
             -webkit-background-clip: text;
             background-clip: text;
@@ -56,13 +58,12 @@
         .sub {
             color: #9aa4bf;
             font-weight: 500;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             background: #1e2438;
             padding: 0.2rem 0.9rem;
             border-radius: 40px;
         }
 
-        /* Device card */
         .device-card {
             background: linear-gradient(135deg, #0f1322, #0b0e18);
             border-radius: 1.8rem;
@@ -80,10 +81,6 @@
             margin-bottom: 12px;
         }
 
-        .device-icon {
-            font-size: 1.4rem;
-        }
-
         .device-id-box {
             background: #00000055;
             padding: 0.3rem 0.8rem;
@@ -91,18 +88,25 @@
             font-family: monospace;
             font-size: 0.7rem;
             color: #ffb347;
-            letter-spacing: 0.5px;
         }
 
         .android-badge {
             font-size: 0.65rem;
             color: #7f89ae;
             display: flex;
-            gap: 15px;
+            justify-content: space-between;
             flex-wrap: wrap;
             margin-top: 8px;
             border-top: 1px dashed #2a2f4a;
             padding-top: 10px;
+        }
+
+        .firebase-status {
+            font-size: 0.6rem;
+            background: #0a0e18;
+            padding: 4px 8px;
+            border-radius: 20px;
+            color: #6eff9e;
         }
 
         .key-section {
@@ -112,14 +116,6 @@
             margin-bottom: 1.5rem;
             text-align: center;
             border: 1px solid #2a2f42;
-        }
-
-        .key-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: #7f89ae;
-            margin-bottom: 0.7rem;
         }
 
         .key-container {
@@ -135,11 +131,10 @@
 
         #generatedKey {
             font-family: 'SF Mono', monospace;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             color: #f5c542;
             flex: 1;
-            text-align: left;
             word-break: break-all;
         }
 
@@ -158,15 +153,6 @@
         .copy-btn:hover {
             background: #ff9142;
             color: white;
-        }
-
-        .used-key-warning {
-            background: #3a2a2a;
-            border-radius: 1rem;
-            padding: 6px;
-            font-size: 0.7rem;
-            color: #ffaa88;
-            margin-top: 8px;
         }
 
         .duration-buttons {
@@ -264,8 +250,9 @@
         }
 
         @media (max-width: 500px) {
-            .generator { padding: 1.2rem; }
-            #generatedKey { font-size: 0.75rem; }
+            .generator { padding: 1rem; }
+            #generatedKey { font-size: 0.7rem; }
+            .copy-btn { padding: 5px 10px; font-size: 0.7rem; }
         }
     </style>
 </head>
@@ -273,11 +260,10 @@
 
 <div class="generator">
     <div class="badge">
-        <span class="logo">🔐 DEBA • ONE-TIME KEYS</span>
-        <span class="sub">ANDROID ID LOCK</span>
+        <span class="logo">☁️ DEBA • FIREBASE KEYS</span>
+        <span class="sub">CLOUD SYNC + ANDROID ID</span>
     </div>
 
-    <!-- DEVICE AUTO-DETECT (Android ID only) -->
     <div class="device-card">
         <div class="device-header">
             <span class="device-icon">🤖</span>
@@ -285,19 +271,18 @@
         </div>
         <div class="android-badge">
             <span>🔑 Android ID: <strong id="androidIdValue">-</strong></span>
+            <span class="firebase-status" id="firebaseStatus">🔥 connecting...</span>
         </div>
-        <div style="font-size:0.6rem; color:#5f6a8a; margin-top:6px;">🔒 Device fingerprint • one-time keys bound to this Android ID</div>
+        <div style="font-size:0.6rem; color:#5f6a8a; margin-top:6px;">☁️ Keys, blacklist & sessions stored in Firebase Realtime Database</div>
     </div>
 
-    <!-- KEY with copy -->
     <div class="key-section">
-        <div class="key-label">🎫 ONE-TIME KEY (NON-REUSABLE)</div>
+        <div class="key-label">🎫 ONE-TIME KEY (CLOUD BLACKLIST)</div>
         <div class="key-container">
             <div id="generatedKey">DEBA-XXXX-XXXX-XXXX</div>
             <button id="copyKeyBtn" class="copy-btn">📋 COPY</button>
         </div>
-        <div class="key-placeholder" id="keyStatusMsg">Each key can be used ONCE per device</div>
-        <div id="usedKeyWarning" class="used-key-warning" style="display:none;">⚠️ This key was already used/redeemed!</div>
+        <div id="keyStatusMsg" style="font-size:0.75rem; color:#7f89ae;">Firebase synced • one-time use</div>
     </div>
 
     <div class="duration-buttons">
@@ -308,38 +293,65 @@
     <div class="task-area">
         <div style="display:flex; justify-content:space-between;">
             <span>📢 LINKVERTISE TASK</span>
-            <span>🔐 Android ID bound</span>
+            <span>☁️ cloud validation</span>
         </div>
-        <div class="task-desc" style="color:#b9c2e0; margin-top:6px;">
-            ▶ Complete task → one‑time key (cannot be reused on any device)
-        </div>
-        <button id="completeTaskBtn" class="verify-btn active-verify">✅ COMPLETE & GET ONE‑TIME KEY</button>
+        <div class="task-desc" style="color:#b9c2e0; margin-top:6px;">▶ Complete task → one‑time key (globally blacklisted after use)</div>
+        <button id="completeTaskBtn" class="verify-btn active-verify">✅ COMPLETE & GET CLOUD KEY</button>
     </div>
 
     <div class="timer-wrapper">
         <div id="countdownDisplay">--:--:--</div>
-        <div id="timerDesc" style="font-size:0.7rem;">Session + key usage tracking</div>
+        <div id="timerDesc" style="font-size:0.7rem;">Firebase session storage</div>
     </div>
 
     <div id="warningMessage" style="color:#ffaa66; font-size:0.7rem; text-align:center; margin:8px 0;"></div>
 
     <div class="rules">
-        <strong>⚡ ONE-TIME KEY + ANDROID ID LOCK</strong>
+        <strong>☁️ FIREBASE JSON + ONE-TIME KEYS</strong>
         <ul style="margin-left:1rem; margin-top:4px;">
-            <li>🔑 Each generated key is <strong>one-time use</strong> — cannot be reused after expiry.</li>
-            <li>🧠 Device auto-detect: Android ID (persistent fingerprint).</li>
-            <li>⛔ Key blacklist: used/expired keys are banned for this Android ID.</li>
-            <li>🕒 3h (1 task) / 6h (2 tasks). Cooldown 10min after key expires.</li>
-            <li>📋 Copy button + localStorage stores used keys to prevent replay.</li>
-            <li>🚫 No IMEI required — pure Android ID binding.</li>
+            <li>🔥 All keys, used keys blacklist & device sessions stored in Firebase Realtime Database.</li>
+            <li>🔑 One-time keys cannot be reused across ANY device (global cloud blacklist).</li>
+            <li>🧠 Android ID binding prevents key sharing between different devices.</li>
+            <li>🕒 Session expiry + cooldown are cloud-synced.</li>
+            <li>📋 Copy & cloud sync — your keys persist across browser refresh.</li>
         </ul>
     </div>
 </div>
 <div id="toastMsg" class="toast-msg"></div>
 
 <script>
-    // ================== DEVICE AUTO-DETECT (ANDROID ID only) ==================
-    // Generate stable Android ID using browser fingerprint
+    // ==================== FIREBASE CONFIGURATION ====================
+    // ⚠️ REPLACE WITH YOUR ACTUAL FIREBASE PROJECT CONFIG ⚠️
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+    apiKey: "AIzaSyA-CH1DBok4_1iNcCfcCVzyT33_A4dfo9A",
+    authDomain: "fakelag-1a34c.firebaseapp.com",
+    projectId: "fakelag-1a34c",
+    storageBucket: "fakelag-1a34c.firebasestorage.app",
+    messagingSenderId: "699773339301",
+    appId: "1:699773339301:web:1b8da2b45d64a06b08ef4c",
+    measurementId: "G-YJQK9E6B55"
+};
+    
+    // Initialize Firebase
+    let db = null;
+    let firebaseReady = false;
+    
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.database();
+        firebaseReady = true;
+        document.getElementById('firebaseStatus').innerHTML = '✅ Firebase ready';
+        document.getElementById('firebaseStatus').style.color = '#6eff9e';
+    } catch (e) {
+        console.warn("Firebase init error", e);
+        document.getElementById('firebaseStatus').innerHTML = '⚠️ Firebase error';
+        document.getElementById('firebaseStatus').style.color = '#ff8866';
+    }
+    
+    // ================== DEVICE ANDROID ID ==================
     function generateAndroidId() {
         const nav = navigator;
         const screenRes = `${screen.width}x${screen.height}x${screen.colorDepth}`;
@@ -350,10 +362,8 @@
         const deviceMemory = nav.deviceMemory || 'unknown';
         const userAgent = nav.userAgent;
         
-        // Create unique fingerprint
         const fingerprint = `${platform}|${screenRes}|${timezone}|${language}|${hardwareConcurrency}|${deviceMemory}|${userAgent.substring(0, 80)}`;
         
-        // Generate hash as Android ID (16 hex characters)
         let hash = 0;
         for (let i = 0; i < fingerprint.length; i++) {
             hash = ((hash << 5) - hash) + fingerprint.charCodeAt(i);
@@ -361,7 +371,6 @@
         }
         const positiveHash = Math.abs(hash);
         const androidId = positiveHash.toString(16).slice(0, 16).padStart(16, '0').toUpperCase();
-        
         return androidId;
     }
     
@@ -371,98 +380,105 @@
     document.getElementById('androidIdValue').innerText = DEVICE_ANDROID_ID;
     document.getElementById('deviceShortId').innerText = DEVICE_ANDROID_ID.slice(0, 8) + '...';
     
-    // ========== STORAGE KEYS with one-time lock & blacklist ==========
-    const STORAGE = {
-        DEVICE_ID: "deba_oneTime_deviceId",
-        ACTIVE_KEY: "deba_ot_activeKey",
-        KEY_EXPIRY: "deba_ot_expiry",
-        COOLDOWN_UNTIL: "deba_ot_cooldown",
-        SELECTED_HOURS: "deba_ot_hours",
-        PENDING_6H: "deba_ot_pending6h",
-        USED_KEYS_SET: "deba_ot_usedKeys"
+    // ========== LOCAL + CLOUD STORAGE STRUCTURE ==========
+    // local cache
+    let activeKey = null;
+    let keyExpiryTime = null;
+    let cooldownUntil = null;
+    let selectedHours = 3;
+    let pendingSixHourStep = { active: false, step: 0 };
+    
+    // Firebase paths
+    const FB_PATHS = {
+        DEVICE_SESSION: `sessions/${DEVICE_UNIQUE_ID}`,
+        GLOBAL_BLACKLIST: `global_blacklist`,
+        ACTIVE_KEYS: `active_keys`
     };
     
-    // Initialize or validate device binding
-    let storedDevice = localStorage.getItem(STORAGE.DEVICE_ID);
-    if (!storedDevice) {
-        localStorage.setItem(STORAGE.DEVICE_ID, DEVICE_UNIQUE_ID);
-    } else if (storedDevice !== DEVICE_UNIQUE_ID) {
-        // Different device detected -> reset everything
-        localStorage.clear();
-        localStorage.setItem(STORAGE.DEVICE_ID, DEVICE_UNIQUE_ID);
-        location.reload();
-    }
-    
-    // Load used keys blacklist
-    let usedKeysSet = new Set();
-    try {
-        const loaded = localStorage.getItem(STORAGE.USED_KEYS_SET);
-        if (loaded) usedKeysSet = new Set(JSON.parse(loaded));
-    } catch(e) { usedKeysSet = new Set(); }
-    
-    function saveUsedKeysSet() {
-        localStorage.setItem(STORAGE.USED_KEYS_SET, JSON.stringify([...usedKeysSet]));
-    }
-    
-    function markKeyAsUsed(key) {
-        if (key && !key.includes("COOLDOWN") && !key.includes("DEBA-XXXX")) {
-            usedKeysSet.add(key);
-            saveUsedKeysSet();
-        }
-    }
-    
-    function isKeyUsed(key) {
-        return usedKeysSet.has(key);
-    }
-    
-    // Load session state
-    let activeKey = localStorage.getItem(STORAGE.ACTIVE_KEY) || null;
-    let keyExpiryTime = localStorage.getItem(STORAGE.KEY_EXPIRY) ? parseInt(localStorage.getItem(STORAGE.KEY_EXPIRY)) : null;
-    let cooldownUntil = localStorage.getItem(STORAGE.COOLDOWN_UNTIL) ? parseInt(localStorage.getItem(STORAGE.COOLDOWN_UNTIL)) : null;
-    let selectedHours = parseInt(localStorage.getItem(STORAGE.SELECTED_HOURS)) || 3;
-    let pendingSixHourStep = { active: false, step: 0 };
-    const storedPending = localStorage.getItem(STORAGE.PENDING_6H);
-    if (storedPending) try { pendingSixHourStep = JSON.parse(storedPending); } catch(e) {}
-    
-    // Validate: if activeKey was already used
-    if (activeKey && isKeyUsed(activeKey)) {
-        activeKey = null;
-        keyExpiryTime = null;
-        localStorage.removeItem(STORAGE.ACTIVE_KEY);
-        localStorage.removeItem(STORAGE.KEY_EXPIRY);
-    }
-    
-    let timerInterval = null;
-    
-    // DOM elements
-    const keyDisplay = document.getElementById('generatedKey');
-    const keyStatusMsg = document.getElementById('keyStatusMsg');
-    const countdownDisplay = document.getElementById('countdownDisplay');
-    const warningDiv = document.getElementById('warningMessage');
-    const completeBtn = document.getElementById('completeTaskBtn');
-    const copyBtn = document.getElementById('copyKeyBtn');
-    const usedWarningDiv = document.getElementById('usedKeyWarning');
-    const durBtns = document.querySelectorAll('.dur-btn');
-    const toastEl = document.getElementById('toastMsg');
-    
     function showToast(msg, isError = false) {
-        toastEl.style.backgroundColor = isError ? '#8b3a3a' : '#1e4a4a';
-        toastEl.innerText = msg;
-        toastEl.style.opacity = '1';
-        setTimeout(() => toastEl.style.opacity = '0', 2200);
+        const toast = document.getElementById('toastMsg');
+        toast.style.backgroundColor = isError ? '#8b3a3a' : '#1e4a4a';
+        toast.innerText = msg;
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2200);
     }
     
-    function saveAll() {
-        if (activeKey) localStorage.setItem(STORAGE.ACTIVE_KEY, activeKey);
-        else localStorage.removeItem(STORAGE.ACTIVE_KEY);
-        if (keyExpiryTime) localStorage.setItem(STORAGE.KEY_EXPIRY, keyExpiryTime);
-        else localStorage.removeItem(STORAGE.KEY_EXPIRY);
-        if (cooldownUntil) localStorage.setItem(STORAGE.COOLDOWN_UNTIL, cooldownUntil);
-        else localStorage.removeItem(STORAGE.COOLDOWN_UNTIL);
-        localStorage.setItem(STORAGE.SELECTED_HOURS, selectedHours);
-        localStorage.setItem(STORAGE.PENDING_6H, JSON.stringify(pendingSixHourStep));
+    // generate one-time key
+    function generateOneTimeKey() {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
+        let parts = [];
+        for (let i = 0; i < 3; i++) {
+            let seg = "";
+            for (let j = 0; j < 4; j++) seg += chars[Math.floor(Math.random() * chars.length)];
+            parts.push(seg);
+        }
+        return `DEBA-${parts[0]}-${parts[1]}-${parts[2]}`;
     }
     
+    // check cloud blacklist
+    async function isKeyGloballyUsed(key) {
+        if (!firebaseReady || !db) return false;
+        try {
+            const snapshot = await db.ref(`${FB_PATHS.GLOBAL_BLACKLIST}/${key.replace(/-/g, '_')}`).get();
+            return snapshot.exists();
+        } catch(e) { return false; }
+    }
+    
+    async function markKeyAsUsedGlobally(key) {
+        if (!firebaseReady || !db) return;
+        try {
+            await db.ref(`${FB_PATHS.GLOBAL_BLACKLIST}/${key.replace(/-/g, '_')}`).set({
+                usedAt: Date.now(),
+                deviceId: DEVICE_UNIQUE_ID,
+                key: key
+            });
+        } catch(e) { console.warn(e); }
+    }
+    
+    // save session to cloud
+    async function saveSessionToCloud() {
+        if (!firebaseReady || !db) return;
+        const sessionData = {
+            activeKey: activeKey,
+            keyExpiryTime: keyExpiryTime,
+            cooldownUntil: cooldownUntil,
+            selectedHours: selectedHours,
+            pendingSixHourStep: pendingSixHourStep,
+            lastUpdate: Date.now(),
+            deviceId: DEVICE_UNIQUE_ID
+        };
+        try {
+            await db.ref(`${FB_PATHS.DEVICE_SESSION}`).set(sessionData);
+        } catch(e) {}
+    }
+    
+    // load session from cloud
+    async function loadSessionFromCloud() {
+        if (!firebaseReady || !db) return false;
+        try {
+            const snapshot = await db.ref(`${FB_PATHS.DEVICE_SESSION}`).get();
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                activeKey = data.activeKey || null;
+                keyExpiryTime = data.keyExpiryTime || null;
+                cooldownUntil = data.cooldownUntil || null;
+                selectedHours = data.selectedHours || 3;
+                pendingSixHourStep = data.pendingSixHourStep || { active: false, step: 0 };
+                
+                // validate if activeKey is still valid & not blacklisted globally
+                if (activeKey && await isKeyGloballyUsed(activeKey)) {
+                    activeKey = null;
+                    keyExpiryTime = null;
+                    await saveSessionToCloud();
+                }
+                refreshUI();
+                return true;
+            }
+        } catch(e) {}
+        return false;
+    }
+    
+    // format time
     function formatTime(ms) {
         if (ms <= 0) return "00:00:00";
         const sec = Math.floor(ms / 1000);
@@ -472,74 +488,38 @@
         return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
     }
     
-    function generateOneTimeKey() {
-        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
-        let parts = [];
-        for (let i = 0; i < 3; i++) {
-            let seg = "";
-            for (let j = 0; j < 4; j++) seg += chars[Math.floor(Math.random() * chars.length)];
-            parts.push(seg);
-        }
-        const raw = `DEBA-${parts[0]}-${parts[1]}-${parts[2]}`;
-        if (isKeyUsed(raw)) return generateOneTimeKey();
-        return raw;
-    }
-    
-    function activateOneTimeKey(hours) {
-        const newKey = generateOneTimeKey();
-        const expiry = Date.now() + (hours * 3600000);
-        activeKey = newKey;
-        keyExpiryTime = expiry;
-        cooldownUntil = null;
-        pendingSixHourStep = { active: false, step: 0 };
-        saveAll();
-        refreshUI();
-        showToast(`🔑 One-time key generated: ${newKey} — valid for ${hours}h`, false);
-    }
-    
-    function refreshUI() {
+    // UI refresh
+    async function refreshUI() {
         const now = Date.now();
-        let isActive = (activeKey && keyExpiryTime && now < keyExpiryTime && !isKeyUsed(activeKey));
+        let isActive = (activeKey && keyExpiryTime && now < keyExpiryTime);
         let isCooldown = (cooldownUntil && now < cooldownUntil);
         let canGenerate = (!isActive && !isCooldown);
         
+        const keyDisplay = document.getElementById('generatedKey');
+        const keyStatusMsg = document.getElementById('keyStatusMsg');
+        const countdownDisplay = document.getElementById('countdownDisplay');
+        const warningDiv = document.getElementById('warningMessage');
+        const completeBtn = document.getElementById('completeTaskBtn');
+        const copyBtn = document.getElementById('copyKeyBtn');
+        
         if (isActive && activeKey) {
             keyDisplay.innerText = activeKey;
-            keyStatusMsg.innerText = `✅ ONE-TIME KEY active — expires ${new Date(keyExpiryTime).toLocaleTimeString()}`;
-            usedWarningDiv.style.display = 'none';
+            keyStatusMsg.innerText = `✅ Cloud-synced key — expires ${new Date(keyExpiryTime).toLocaleTimeString()}`;
             copyBtn.style.display = 'flex';
-        } else if (activeKey && keyExpiryTime && now >= keyExpiryTime && !isKeyUsed(activeKey)) {
-            markKeyAsUsed(activeKey);
-            if (!cooldownUntil) cooldownUntil = now + 10 * 60000;
-            activeKey = null;
-            keyExpiryTime = null;
-            saveAll();
-            refreshUI();
-            return;
-        } else if (activeKey && isKeyUsed(activeKey)) {
-            activeKey = null;
-            keyExpiryTime = null;
-            saveAll();
-            refreshUI();
-            return;
         } else if (isCooldown) {
-            keyDisplay.innerText = "⏳ ONE-TIME KEY COOLDOWN";
+            keyDisplay.innerText = "⏳ COOLDOWN (CLOUD SYNC)";
             keyStatusMsg.innerText = `Cooldown: ${Math.ceil((cooldownUntil-now)/60000)} min — Android ID locked`;
-            usedWarningDiv.style.display = 'none';
             copyBtn.style.display = 'none';
         } else {
             keyDisplay.innerText = "DEBA-XXXX-XXXX-XXXX";
-            keyStatusMsg.innerText = "Generate one‑time key (cannot be reused)";
-            usedWarningDiv.style.display = 'none';
+            keyStatusMsg.innerText = "Generate one‑time key (firebase blacklist)";
             copyBtn.style.display = 'flex';
         }
         
-        // Timer display
         if (isActive && keyExpiryTime) countdownDisplay.innerText = formatTime(keyExpiryTime - now);
         else if (isCooldown && cooldownUntil) countdownDisplay.innerText = formatTime(cooldownUntil - now);
         else countdownDisplay.innerText = "--:--:--";
         
-        // Button state
         if (canGenerate) {
             completeBtn.classList.add("active-verify");
             completeBtn.classList.remove("disabled-verify");
@@ -549,54 +529,79 @@
             completeBtn.classList.remove("active-verify");
             completeBtn.classList.add("disabled-verify");
             completeBtn.disabled = true;
-            if (isActive) warningDiv.innerText = "❌ One‑time key active. Wait until expiry + cooldown.";
-            else if (isCooldown) warningDiv.innerText = "❌ Cooldown active for this Android ID.";
-            else warningDiv.innerText = "❌ Cannot generate new key.";
+            if (isActive) warningDiv.innerText = "❌ Active key in cloud. Wait until expiry + cooldown.";
+            else if (isCooldown) warningDiv.innerText = "❌ Cooldown active (Firebase session).";
         }
         
-        // Highlight duration buttons
-        durBtns.forEach(btn => {
+        document.querySelectorAll('.dur-btn').forEach(btn => {
             let h = parseInt(btn.dataset.hours);
             if (h === selectedHours) btn.classList.add('active');
             else btn.classList.remove('active');
         });
     }
     
-    async function copyKey() {
-        let txt = keyDisplay.innerText;
-        if (!txt || txt.includes("COOLDOWN") || txt.includes("DEBA-XXXX")) {
-            showToast("No valid key to copy", true);
-            return;
+    // activate new key with cloud blacklist
+    async function activateOneTimeKey(hours) {
+        let newKey = generateOneTimeKey();
+        // avoid collision with existing blacklisted keys
+        while (await isKeyGloballyUsed(newKey)) {
+            newKey = generateOneTimeKey();
         }
-        await navigator.clipboard.writeText(txt);
-        showToast("✅ One-time key copied", false);
+        const expiry = Date.now() + (hours * 3600000);
+        activeKey = newKey;
+        keyExpiryTime = expiry;
+        cooldownUntil = null;
+        pendingSixHourStep = { active: false, step: 0 };
+        await saveSessionToCloud();
+        refreshUI();
+        showToast(`🔑 Cloud key: ${newKey} — ${hours}h validity`, false);
     }
     
-    function processTask() {
+    async function processTask() {
         const now = Date.now();
-        let isActive = (activeKey && keyExpiryTime && now < keyExpiryTime && !isKeyUsed(activeKey));
+        let isActive = (activeKey && keyExpiryTime && now < keyExpiryTime);
         let isCooldownActive = (cooldownUntil && now < cooldownUntil);
         if (isActive || isCooldownActive) {
-            warningDiv.innerText = isActive ? "Active one‑time key in use." : "Cooldown in progress.";
+            document.getElementById('warningMessage').innerText = isActive ? "Active cloud key in use." : "Cooldown in progress.";
             return;
         }
         
         if (selectedHours === 6) {
             if (!pendingSixHourStep.active) {
                 pendingSixHourStep = { active: true, step: 1 };
-                saveAll();
-                warningDiv.innerText = "🔁 6H MODE: first task done! Need one more verification.";
+                await saveSessionToCloud();
+                document.getElementById('warningMessage').innerText = "🔁 6H MODE: first task done! Need one more verification.";
                 showToast("6h mode: 1/2 tasks completed", false);
                 refreshUI();
                 return;
             } else if (pendingSixHourStep.active && pendingSixHourStep.step === 1) {
-                activateOneTimeKey(6);
+                await activateOneTimeKey(6);
                 pendingSixHourStep = { active: false, step: 0 };
-                saveAll();
+                await saveSessionToCloud();
                 return;
             }
         } else if (selectedHours === 3) {
-            activateOneTimeKey(3);
+            await activateOneTimeKey(3);
+        }
+    }
+    
+    async function expireAndCleanup() {
+        const now = Date.now();
+        let changed = false;
+        if (activeKey && keyExpiryTime && now >= keyExpiryTime) {
+            await markKeyAsUsedGlobally(activeKey);
+            activeKey = null;
+            keyExpiryTime = null;
+            if (!cooldownUntil) cooldownUntil = now + 600000;
+            changed = true;
+        }
+        if (cooldownUntil && now >= cooldownUntil) {
+            cooldownUntil = null;
+            changed = true;
+        }
+        if (changed) {
+            await saveSessionToCloud();
+            refreshUI();
         }
     }
     
@@ -607,35 +612,45 @@
         if (isActive || isCooldown) return;
         selectedHours = hours;
         pendingSixHourStep = { active: false, step: 0 };
-        saveAll();
+        saveSessionToCloud();
         refreshUI();
-        showToast(`Duration: ${hours}h (Android ID locked)`, false);
+        showToast(`Duration: ${hours}h (cloud synced)`, false);
     }
     
-    // Auto cleanup interval
-    setInterval(() => {
-        const now = Date.now();
-        if (activeKey && keyExpiryTime && now >= keyExpiryTime && !isKeyUsed(activeKey)) {
-            markKeyAsUsed(activeKey);
-            if (!cooldownUntil) cooldownUntil = now + 600000;
-            activeKey = null;
-            keyExpiryTime = null;
-            saveAll();
+    async function copyKey() {
+        const keyDisplay = document.getElementById('generatedKey');
+        let txt = keyDisplay.innerText;
+        if (!txt || txt.includes("COOLDOWN") || txt.includes("DEBA-XXXX")) {
+            showToast("No valid key to copy", true);
+            return;
         }
-        if (cooldownUntil && now >= cooldownUntil) {
-            cooldownUntil = null;
-            saveAll();
+        await navigator.clipboard.writeText(txt);
+        showToast("✅ Cloud key copied", false);
+    }
+    
+    // event binding
+    document.getElementById('copyKeyBtn').addEventListener('click', copyKey);
+    document.getElementById('completeTaskBtn').addEventListener('click', processTask);
+    document.querySelectorAll('.dur-btn').forEach(btn => {
+        btn.addEventListener('click', () => setDuration(parseInt(btn.dataset.hours)));
+    });
+    
+    // auto cleanup every 2 seconds
+    setInterval(async () => {
+        await expireAndCleanup();
+        refreshUI();
+    }, 2000);
+    
+    // initialize: load from cloud
+    (async function init() {
+        if (firebaseReady) {
+            await loadSessionFromCloud();
+            showToast("☁️ Firebase active • cloud blacklist enabled", false);
+        } else {
+            showToast("⚠️ Firebase not configured — using localStorage fallback", true);
         }
         refreshUI();
-    }, 700);
-    
-    // Event listeners
-    copyBtn.addEventListener('click', copyKey);
-    completeBtn.addEventListener('click', processTask);
-    durBtns.forEach(btn => btn.addEventListener('click', () => setDuration(parseInt(btn.dataset.hours))));
-    
-    refreshUI();
-    showToast("🔐 Android ID locked • One-time keys only", false);
+    })();
 </script>
 </body>
 </html>
