@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>DEBA Key System • Fake Ninja Session Generator</title>
+    <title>DEBA Key System • Copy Button + Device Lock + Time Storage</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            user-select: none;
         }
 
         body {
@@ -23,9 +22,9 @@
         }
 
         .generator {
-            max-width: 580px;
+            max-width: 650px;
             width: 100%;
-            background: rgba(18, 22, 32, 0.85);
+            background: rgba(18, 22, 32, 0.92);
             backdrop-filter: blur(2px);
             border-radius: 3rem;
             box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
@@ -52,16 +51,36 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
         }
 
         .sub {
             color: #9aa4bf;
             font-weight: 500;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             background: #1e2438;
             padding: 0.2rem 0.9rem;
             border-radius: 40px;
+        }
+
+        .device-badge {
+            background: #0f1322;
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.7rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            border: 1px solid #2a2f46;
+        }
+
+        .device-id {
+            font-family: monospace;
+            color: #ffb347;
+            letter-spacing: 1px;
         }
 
         .key-section {
@@ -83,25 +102,59 @@
             margin-bottom: 0.7rem;
         }
 
-        #generatedKey {
+        .key-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             background: #00000066;
+            border-radius: 2rem;
+            border: 1px solid #3e3f5e;
+            padding: 0.3rem 0.3rem 0.3rem 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        #generatedKey {
             font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 700;
             letter-spacing: 1px;
-            padding: 0.8rem 0.5rem;
-            border-radius: 2rem;
             color: #f5c542;
             text-shadow: 0 0 4px #ffb34780;
             word-break: break-all;
-            border: 1px solid #3e3f5e;
-            margin-bottom: 0.75rem;
+            flex: 1;
+            text-align: left;
+        }
+
+        .copy-btn {
+            background: #2a2f4a;
+            border: none;
+            color: #cdd5f0;
+            padding: 8px 16px;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: #ff9142;
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .copy-btn.copied {
+            background: #2e7d32;
+            color: white;
         }
 
         .key-placeholder {
             color: #4c5270;
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 0.8rem;
         }
 
         .duration-panel {
@@ -113,9 +166,6 @@
             color: #cdd5f0;
             margin-bottom: 1rem;
             font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .duration-buttons {
@@ -131,7 +181,7 @@
             padding: 0.85rem 0;
             border-radius: 2rem;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: 0.2s;
             color: #b9c3ec;
@@ -148,7 +198,7 @@
         .task-area {
             background: #10131f;
             border-radius: 1.6rem;
-            padding: 1.2rem 1.2rem;
+            padding: 1.2rem;
             margin: 1.8rem 0;
             border-left: 4px solid #ff9142;
         }
@@ -156,13 +206,7 @@
         .task-header {
             display: flex;
             justify-content: space-between;
-            font-weight: 600;
-            margin-bottom: 0.8rem;
-        }
-
-        .task-desc {
-            color: #b9c2e0;
-            font-size: 0.85rem;
+            margin-bottom: 8px;
         }
 
         .verify-btn {
@@ -205,15 +249,10 @@
 
         #countdownDisplay {
             font-family: monospace;
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 800;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             color: #ffbc6e;
-        }
-
-        .cooldown-message {
-            font-size: 0.75rem;
-            color: #a8b2d1;
         }
 
         .rules {
@@ -229,17 +268,6 @@
         .rules ul {
             padding-left: 1.2rem;
             margin-top: 6px;
-        }
-
-        button {
-            background: none;
-            border: none;
-            font-family: inherit;
-        }
-
-        hr {
-            border-color: #242a3f;
-            margin: 10px 0;
         }
 
         .toast-msg {
@@ -260,9 +288,31 @@
         }
 
         @media (max-width: 480px) {
-            .generator { padding: 1.4rem; }
-            #generatedKey { font-size: 1rem; letter-spacing: 0px; }
+            .generator { padding: 1.2rem; }
+            #generatedKey { font-size: 0.75rem; }
+            .copy-btn { padding: 5px 10px; font-size: 0.7rem; }
             .toast-msg { font-size: 0.7rem; white-space: normal; width: 90%; text-align: center; }
+            .device-id { font-size: 0.65rem; }
+        }
+
+        button {
+            background: none;
+            border: none;
+        }
+
+        .reset-device-btn {
+            background: #2a1e3a;
+            border: 1px solid #5a4a7a;
+            padding: 0.25rem 0.75rem;
+            border-radius: 30px;
+            color: #ccb5ff;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .reset-device-btn:hover {
+            background: #3a2a4a;
         }
     </style>
 </head>
@@ -270,69 +320,110 @@
 
 <div class="generator">
     <div class="badge">
-        <span class="logo">⚔️ DEBA · NINJA</span>
-        <span class="sub">KEY SYSTEM</span>
+        <span class="logo">🔐 DEBA · ONE DEVICE</span>
+        <span class="sub">COPY KEY + TIME STORAGE</span>
     </div>
 
-    <!-- KEY OUTPUT (DEBA format) -->
+    <!-- Device fingerprint -->
+    <div class="device-badge">
+        <span>📱 THIS DEVICE ID:</span>
+        <span class="device-id" id="deviceIdDisplay">-</span>
+        <button id="resetDeviceBtn" class="reset-device-btn" style="display:none;">⚠️ RESET (admin)</button>
+    </div>
+
+    <!-- KEY display with COPY button -->
     <div class="key-section">
         <div class="key-label">🔑 DEBA ACTIVATION KEY</div>
-        <div id="generatedKey">DEBA-XXXX-XXXX-XXXX</div>
-        <div class="key-placeholder" id="keyStatusMsg">Complete task → get DEBA key</div>
+        <div class="key-container">
+            <div id="generatedKey">DEBA-XXXX-XXXX-XXXX</div>
+            <button id="copyKeyBtn" class="copy-btn">📋 COPY</button>
+        </div>
+        <div class="key-placeholder" id="keyStatusMsg">One device = one key • Time-locked</div>
     </div>
 
-    <!-- session duration -->
     <div class="duration-panel">
         <div class="duration-title">⚡ SESSION DURATION</div>
         <div class="duration-buttons">
-            <div class="dur-btn" data-hours="3">3 HOURS (1 task)</div>
-            <div class="dur-btn" data-hours="6">6 HOURS (2 tasks)</div>
+            <div class="dur-btn" data-hours="3">3 HOURS</div>
+            <div class="dur-btn" data-hours="6">6 HOURS</div>
         </div>
     </div>
 
-    <!-- LINKVERTISE TASK (simulated) -->
     <div class="task-area">
         <div class="task-header">
-            <span>📢 LINKVERTISE GATEWAY</span>
-            <span>✔️ mandatory</span>
+            <span>📢 LINKVERTISE TASK</span>
+            <span>🔒 device-locked</span>
         </div>
         <div class="task-desc">
-            ▶ Complete required task(s) to unlock a DEBA key.<br>
-            <span style="font-size:0.7rem;">* 3h = 1 task | 6h = 2 tasks (sequential)</span>
+            ▶ Complete the required task(s). Key & time are saved to this device.<br>
+            <span style="font-size:0.7rem;">* 3h = 1 task | 6h = 2 tasks | session data persists after refresh</span>
         </div>
         <button id="completeTaskBtn" class="verify-btn active-verify">
             ✅ COMPLETE & GET DEBA KEY
         </button>
     </div>
 
-    <!-- timer / session info -->
     <div class="timer-wrapper">
         <div id="countdownDisplay">--:--:--</div>
-        <div class="cooldown-message" id="timerDesc">No active session</div>
+        <div class="cooldown-message" id="timerDesc">Session & cooldown saved in browser</div>
     </div>
 
-    <div id="warningMessage" style="color:#ffaa66; font-size:0.75rem; text-align:center; margin-top: -0.4rem; margin-bottom: 0.5rem;"></div>
+    <div id="warningMessage" style="color:#ffaa66; font-size:0.75rem; text-align:center; margin: 0.5rem 0;"></div>
 
     <div class="rules">
-        <strong>📜 RULES — DEBA SESSION</strong>
+        <strong>📜 PERSISTENT DEVICE LOCK + COPY BUTTON</strong>
         <ul>
-            <li>Key format: <strong>DEBA-XXXX-XXXX-XXXX</strong> (unique per session).</li>
-            <li>Valid for <strong>3h (1 task)</strong> or <strong>6h (2 tasks)</strong>.</li>
-            <li>1 key = 1 device — cannot be transferred.</li>
-            <li>While key ACTIVE → generation locked.</li>
-            <li>After expiry → <strong>10 min cooldown</strong> before new key.</li>
-            <li>Linkvertise task completion is mandatory.</li>
+            <li>🔒 <strong>One device = one active key</strong> (saved in localStorage).</li>
+            <li>📋 <strong>COPY BUTTON</strong> — click to copy your DEBA key to clipboard.</li>
+            <li>⏱️ Expiry time & cooldown are stored — survives page refresh/close.</li>
+            <li>🔑 Key format: <strong>DEBA-XXXX-XXXX-XXXX</strong> (unique per session).</li>
+            <li>🕒 3h (1 task) / 6h (2 tasks). After expiry → 10 min cooldown.</li>
+            <li>🚫 While key active, same device cannot generate new key.</li>
         </ul>
     </div>
 </div>
 <div id="toastMsg" class="toast-msg"></div>
 
 <script>
-    // ------------------- STATE (fully respects cooldown + DEBA format) ----------------
-    let activeKey = null;            // current DEBA-xxxx key
-    let keyExpiryTime = null;        // timestamp ms
-    let cooldownUntil = null;        // timestamp ms (expiry+10min)
-    let selectedHours = 3;           // default 3h
+    // ---------- PERSISTENT DEVICE LOCK + TIME STORAGE (localStorage) ----------
+    const STORAGE_KEYS = {
+        DEVICE_ID: "deba_device_id",
+        ACTIVE_KEY: "deba_active_key",
+        KEY_EXPIRY: "deba_key_expiry",
+        COOLDOWN_UNTIL: "deba_cooldown_until",
+        SELECTED_HOURS: "deba_selected_hours",
+        PENDING_6H_STEP: "deba_pending_6h"
+    };
+    
+    // Device ID
+    function getOrCreateDeviceId() {
+        let deviceId = localStorage.getItem(STORAGE_KEYS.DEVICE_ID);
+        if (!deviceId) {
+            const nav = navigator.userAgent.substring(0, 30) + (screen.width || '') + (screen.height || '');
+            const rand = Math.random().toString(36).substring(2, 12);
+            deviceId = btoa(nav + rand + Date.now()).substring(0, 24);
+            localStorage.setItem(STORAGE_KEYS.DEVICE_ID, deviceId);
+        }
+        return deviceId;
+    }
+    
+    const deviceId = getOrCreateDeviceId();
+    document.getElementById('deviceIdDisplay').innerText = deviceId.substring(0, 16) + '...';
+    
+    // Load state from storage
+    let activeKey = localStorage.getItem(STORAGE_KEYS.ACTIVE_KEY) || null;
+    let keyExpiryTime = localStorage.getItem(STORAGE_KEYS.KEY_EXPIRY) ? parseInt(localStorage.getItem(STORAGE_KEYS.KEY_EXPIRY)) : null;
+    let cooldownUntil = localStorage.getItem(STORAGE_KEYS.COOLDOWN_UNTIL) ? parseInt(localStorage.getItem(STORAGE_KEYS.COOLDOWN_UNTIL)) : null;
+    let selectedHours = parseInt(localStorage.getItem(STORAGE_KEYS.SELECTED_HOURS)) || 3;
+    
+    let pendingSixHourStep = { active: false, step: 0 };
+    const storedPending = localStorage.getItem(STORAGE_KEYS.PENDING_6H_STEP);
+    if (storedPending) {
+        try {
+            pendingSixHourStep = JSON.parse(storedPending);
+        } catch(e) { pendingSixHourStep = { active: false, step: 0 }; }
+    }
+    
     let currentTimerInterval = null;
     
     // DOM elements
@@ -342,15 +433,73 @@
     const timerDescSpan = document.getElementById('timerDesc');
     const warningDiv = document.getElementById('warningMessage');
     const completeTaskBtn = document.getElementById('completeTaskBtn');
+    const copyKeyBtn = document.getElementById('copyKeyBtn');
     const durBtns = document.querySelectorAll('.dur-btn');
     const toastEl = document.getElementById('toastMsg');
+    const resetDeviceBtn = document.getElementById('resetDeviceBtn');
+    
+    // Double-click logo to show reset button
+    document.querySelector('.logo').addEventListener('dblclick', () => {
+        resetDeviceBtn.style.display = 'inline-block';
+        showToast("Admin reset unlocked", false);
+    });
     
     function showToast(msg, isError = false) {
         toastEl.style.backgroundColor = isError ? '#5a2a2a' : '#1e3a3a';
-        toastEl.style.color = '#ffecb3';
         toastEl.innerText = msg;
         toastEl.style.opacity = '1';
-        setTimeout(() => { toastEl.style.opacity = '0'; }, 2200);
+        setTimeout(() => { toastEl.style.opacity = '0'; }, 2500);
+    }
+    
+    // Copy key to clipboard
+    async function copyKeyToClipboard() {
+        const keyText = keyDisplayDiv.innerText;
+        if (!keyText || keyText === "DEBA-XXXX-XXXX-XXXX" || keyText.includes("COOLDOWN")) {
+            showToast("❌ No valid key to copy!", true);
+            return;
+        }
+        
+        try {
+            await navigator.clipboard.writeText(keyText);
+            showToast("✅ Key copied to clipboard!", false);
+            copyKeyBtn.classList.add('copied');
+            copyKeyBtn.innerHTML = "✓ COPIED!";
+            setTimeout(() => {
+                copyKeyBtn.classList.remove('copied');
+                copyKeyBtn.innerHTML = "📋 COPY";
+            }, 2000);
+        } catch (err) {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = keyText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast("✅ Key copied (fallback)!", false);
+            copyKeyBtn.classList.add('copied');
+            copyKeyBtn.innerHTML = "✓ COPIED!";
+            setTimeout(() => {
+                copyKeyBtn.classList.remove('copied');
+                copyKeyBtn.innerHTML = "📋 COPY";
+            }, 2000);
+        }
+    }
+    
+    copyKeyBtn.addEventListener('click', copyKeyToClipboard);
+    
+    function saveAllToStorage() {
+        if (activeKey) localStorage.setItem(STORAGE_KEYS.ACTIVE_KEY, activeKey);
+        else localStorage.removeItem(STORAGE_KEYS.ACTIVE_KEY);
+        
+        if (keyExpiryTime) localStorage.setItem(STORAGE_KEYS.KEY_EXPIRY, keyExpiryTime.toString());
+        else localStorage.removeItem(STORAGE_KEYS.KEY_EXPIRY);
+        
+        if (cooldownUntil) localStorage.setItem(STORAGE_KEYS.COOLDOWN_UNTIL, cooldownUntil.toString());
+        else localStorage.removeItem(STORAGE_KEYS.COOLDOWN_UNTIL);
+        
+        localStorage.setItem(STORAGE_KEYS.SELECTED_HOURS, selectedHours.toString());
+        localStorage.setItem(STORAGE_KEYS.PENDING_6H_STEP, JSON.stringify(pendingSixHourStep));
     }
     
     function stopTimerInterval() {
@@ -362,27 +511,24 @@
     
     function formatTimeLeft(msLeft) {
         if (msLeft <= 0) return "00:00:00";
-        const totalSeconds = Math.floor(msLeft / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
+        const totalSec = Math.floor(msLeft / 1000);
+        const hours = Math.floor(totalSec / 3600);
+        const minutes = Math.floor((totalSec % 3600) / 60);
+        const seconds = totalSec % 60;
         return `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
     }
     
-    // ---------- DEBA KEY GENERATOR (exactly DEBA-XXXX-XXXX-XXXX) ----------
+    // DEBA KEY GENERATOR
     function generateDebaKey() {
         const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
         let segments = [];
-        for (let s = 0; s < 3; s++) {        // 3 segments after DEBA-
-            let segment = "";
-            for (let i = 0; i < 4; i++) {
-                segment += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            segments.push(segment);
+        for (let s = 0; s < 3; s++) {
+            let seg = "";
+            for (let i = 0; i < 4; i++) seg += chars.charAt(Math.floor(Math.random() * chars.length));
+            segments.push(seg);
         }
         return `DEBA-${segments[0]}-${segments[1]}-${segments[2]}`;
     }
-    // ---------------------------------------------------------------------
     
     function refreshUI() {
         const now = Date.now();
@@ -390,42 +536,38 @@
         let isCooldown = (cooldownUntil !== null && now < cooldownUntil);
         let canGenerate = (!isKeyActive && !isCooldown);
         
-        // KEY display & messages
         if (isKeyActive && activeKey) {
             keyDisplayDiv.innerText = activeKey;
-            keyStatusMsgSpan.innerText = `✅ ACTIVE until ${new Date(keyExpiryTime).toLocaleTimeString()}`;
+            keyStatusMsgSpan.innerText = `🔒 Device-locked key active until ${new Date(keyExpiryTime).toLocaleString()}`;
             keyDisplayDiv.style.opacity = "1";
+            copyKeyBtn.style.display = "flex";
+        } else if (isCooldown) {
+            keyDisplayDiv.innerText = "⏳ COOLDOWN ACTIVE";
+            keyStatusMsgSpan.innerText = `Cooldown: ${Math.ceil((cooldownUntil - now)/60000)} min left for this device`;
+            keyDisplayDiv.style.opacity = "0.7";
+            copyKeyBtn.style.display = "none";
         } else {
-            if (isCooldown) {
-                keyDisplayDiv.innerText = "⏳ COOLDOWN";
-                keyStatusMsgSpan.innerText = `Cooldown: ${Math.ceil((cooldownUntil - now)/60000)} min left`;
-                keyDisplayDiv.style.opacity = "0.7";
-            } else {
-                keyDisplayDiv.innerText = "DEBA-XXXX-XXXX-XXXX";
-                keyStatusMsgSpan.innerText = "Choose duration & complete Linkvertise task";
-                keyDisplayDiv.style.opacity = "1";
-            }
-            if (!isKeyActive && activeKey && keyExpiryTime && now >= keyExpiryTime && !isCooldown) {
-                // fallback consistency
-                keyStatusMsgSpan.innerText = "Key expired. Cooldown started.";
-            }
+            keyDisplayDiv.innerText = "DEBA-XXXX-XXXX-XXXX";
+            keyStatusMsgSpan.innerText = "Complete Linkvertise task → key + time saved to device";
+            keyDisplayDiv.style.opacity = "1";
+            copyKeyBtn.style.display = "flex";
         }
         
         // Timer display
         if (isKeyActive && keyExpiryTime) {
             const remaining = keyExpiryTime - now;
             countdownDisplay.innerText = formatTimeLeft(remaining > 0 ? remaining : 0);
-            timerDescSpan.innerText = "🔓 Session active — key valid";
+            timerDescSpan.innerText = "⏳ Key active (persistent storage)";
         } else if (isCooldown && cooldownUntil) {
             const cdRem = cooldownUntil - now;
             countdownDisplay.innerText = formatTimeLeft(cdRem > 0 ? cdRem : 0);
-            timerDescSpan.innerText = "⛔ COOLDOWN (10 min after expiry)";
+            timerDescSpan.innerText = "⛔ Cooldown · 10 minutes";
         } else {
             countdownDisplay.innerText = "--:--:--";
-            timerDescSpan.innerText = "⚡ Ready for new DEBA key";
+            timerDescSpan.innerText = "Ready for new DEBA key (device unlocked)";
         }
         
-        // Button / warning logic
+        // Button state
         if (canGenerate) {
             completeTaskBtn.classList.add("active-verify");
             completeTaskBtn.classList.remove("disabled-verify");
@@ -435,55 +577,53 @@
             completeTaskBtn.classList.remove("active-verify");
             completeTaskBtn.classList.add("disabled-verify");
             completeTaskBtn.disabled = true;
-            if (isKeyActive) warningDiv.innerText = "❌ Active key running. Wait until expiry & cooldown ends.";
-            else if (isCooldown) warningDiv.innerText = "❌ Cooldown active (10min). Please wait before generating new key.";
-            else warningDiv.innerText = "❌ Cannot generate new key right now.";
+            if (isKeyActive) warningDiv.innerText = "❌ Active key on this device. Wait until expiry + cooldown.";
+            else if (isCooldown) warningDiv.innerText = "❌ Cooldown period active for this device.";
+            else warningDiv.innerText = "❌ Cannot generate right now.";
         }
         
-        // highlight active duration button — only if not blocked
+        // Highlight duration buttons
         durBtns.forEach(btn => {
-            const hoursVal = parseInt(btn.getAttribute('data-hours'), 10);
-            if (hoursVal === selectedHours) btn.classList.add('active');
+            const h = parseInt(btn.getAttribute('data-hours'), 10);
+            if (h === selectedHours) btn.classList.add('active');
             else btn.classList.remove('active');
         });
     }
     
-    // start new key session (DEBA)
     function activateNewKey(hours) {
         const now = Date.now();
         const expiry = now + (hours * 60 * 60 * 1000);
-        const newKey = generateDebaKey();          // DEBA format !
+        const newKey = generateDebaKey();
         activeKey = newKey;
         keyExpiryTime = expiry;
-        cooldownUntil = null;                      // clear any previous cooldown
+        cooldownUntil = null;
+        pendingSixHourStep = { active: false, step: 0 };
+        saveAllToStorage();
         stopTimerInterval();
         
-        // refresh timer each second
         currentTimerInterval = setInterval(() => {
-            refreshUI();
             const nowMs = Date.now();
-            // handle auto-expiry and cooldown transition
             if (activeKey && keyExpiryTime && nowMs >= keyExpiryTime) {
                 if (cooldownUntil === null) {
-                    cooldownUntil = nowMs + (10 * 60 * 1000);   // 10 min cooldown after expiry
+                    cooldownUntil = nowMs + (10 * 60 * 1000);
                 }
                 activeKey = null;
                 keyExpiryTime = null;
+                saveAllToStorage();
                 refreshUI();
             }
             if (cooldownUntil && Date.now() >= cooldownUntil && !activeKey) {
                 cooldownUntil = null;
+                saveAllToStorage();
                 refreshUI();
             }
             refreshUI();
         }, 500);
         
         refreshUI();
-        showToast(`🎉 DEBA key generated! Valid for ${hours} hours.`, false);
+        saveAllToStorage();
+        showToast(`🔑 DEBA key generated for ${hours}h • stored on this device`, false);
     }
-    
-    // Task & session logic: handles 1-task (3h) or 2-task (6h) flow exactly like original.
-    let pendingSixHourStep = { active: false, step: 0 };   // internal for 6h double task
     
     function processLinkvertiseTask() {
         const now = Date.now();
@@ -491,48 +631,40 @@
         const isCooldownActive = (cooldownUntil !== null && now < cooldownUntil);
         
         if (isKeyActive) {
-            warningDiv.innerText = "You already have an active DEBA key. Wait until expiry + cooldown.";
+            warningDiv.innerText = "This device already has an active key. Wait until expiry + cooldown.";
+            showToast("Active key exists on this device", true);
             refreshUI();
-            showToast("Active key running. Cannot generate new key.", true);
             return false;
         }
         if (isCooldownActive) {
             const remainMin = Math.ceil((cooldownUntil - now)/60000);
-            warningDiv.innerText = `Cooldown active: ${remainMin} minutes remaining.`;
-            showToast(`Cooldown: ${remainMin} min left.`, true);
+            warningDiv.innerText = `Cooldown active for this device: ${remainMin} minutes left.`;
+            showToast(`Cooldown: ${remainMin} min`, true);
             refreshUI();
             return false;
         }
         
-        // 6h double-task logic
+        // 6h double-task handling
         if (selectedHours === 6) {
             if (!pendingSixHourStep.active) {
-                pendingSixHourStep.active = true;
-                pendingSixHourStep.step = 1;
-                warningDiv.innerText = "🔁 6H MODE: First task completed! You need ONE MORE verification for 6h key.";
-                showToast("✔️ First Linkvertise task done. Complete second task to unlock 6h DEBA key.", false);
+                pendingSixHourStep = { active: true, step: 1 };
+                saveAllToStorage();
+                warningDiv.innerText = "🔁 6H MODE: First task done! One more verification needed for 6h DEBA key.";
+                showToast("✔️ 1/2 tasks. Complete again for 6h key.", false);
                 refreshUI();
                 return false;
             } else if (pendingSixHourStep.active && pendingSixHourStep.step === 1) {
-                // second task -> generate 6h key
                 activateNewKey(6);
-                pendingSixHourStep.active = false;
-                pendingSixHourStep.step = 0;
+                pendingSixHourStep = { active: false, step: 0 };
+                saveAllToStorage();
                 return true;
             }
         } 
         else if (selectedHours === 3) {
-            // 3h -> single task completes directly
             activateNewKey(3);
             return true;
         }
         return false;
-    }
-    
-    // reset double task state when duration changes if needed
-    function resetDoubleTaskState() {
-        pendingSixHourStep.active = false;
-        pendingSixHourStep.step = 0;
     }
     
     function setDuration(hours) {
@@ -540,21 +672,43 @@
         const isKeyActive = (activeKey !== null && keyExpiryTime !== null && now < keyExpiryTime);
         const isCooldown = (cooldownUntil !== null && now < cooldownUntil);
         if (isKeyActive || isCooldown) {
-            warningDiv.innerText = isKeyActive ? "Cannot change duration while key is active." : "Cannot change during cooldown.";
+            warningDiv.innerText = isKeyActive ? "Cannot change duration while key active on device." : "Cannot change during cooldown.";
             refreshUI();
             return false;
         }
         selectedHours = hours;
-        resetDoubleTaskState();
+        pendingSixHourStep = { active: false, step: 0 };
+        saveAllToStorage();
         refreshUI();
-        warningDiv.innerText = "";
-        showToast(`Duration set to ${hours} hours. Complete task to get DEBA key.`, false);
+        showToast(`Duration: ${hours} hours (device preference saved)`, false);
         return true;
     }
     
-    // Event listeners
+    function resetDeviceData() {
+        if (confirm("⚠️ RESET DEVICE DATA: This will clear active key, cooldown and pending tasks. Are you sure?")) {
+            localStorage.removeItem(STORAGE_KEYS.ACTIVE_KEY);
+            localStorage.removeItem(STORAGE_KEYS.KEY_EXPIRY);
+            localStorage.removeItem(STORAGE_KEYS.COOLDOWN_UNTIL);
+            localStorage.removeItem(STORAGE_KEYS.PENDING_6H_STEP);
+            localStorage.removeItem(STORAGE_KEYS.SELECTED_HOURS);
+            
+            activeKey = null;
+            keyExpiryTime = null;
+            cooldownUntil = null;
+            selectedHours = 3;
+            pendingSixHourStep = { active: false, step: 0 };
+            saveAllToStorage();
+            stopTimerInterval();
+            refreshUI();
+            showToast("Device key data cleared. You can generate a new key.", false);
+            setTimeout(() => location.reload(), 800);
+        }
+    }
+    
+    resetDeviceBtn.addEventListener('click', resetDeviceData);
+    
     durBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
             const hoursVal = parseInt(btn.getAttribute('data-hours'), 10);
             setDuration(hoursVal);
         });
@@ -565,32 +719,35 @@
         const activeNow = (activeKey !== null && keyExpiryTime !== null && now < keyExpiryTime);
         const cooldownNow = (cooldownUntil !== null && now < cooldownUntil);
         if (activeNow) {
-            warningDiv.innerText = "Active key exists – wait for expiry + cooldown.";
-            refreshUI();
-            showToast("Active session in progress.", true);
+            warningDiv.innerText = "Active key on device — wait for expiry.";
+            showToast("Active key exists", true);
             return;
         }
         if (cooldownNow) {
             const remain = Math.ceil((cooldownUntil - now)/60000);
-            warningDiv.innerText = `Cooldown ${remain} min remaining.`;
-            refreshUI();
-            showToast(`Cooldown: ${remain} minute(s)`, true);
+            warningDiv.innerText = `Cooldown ${remain} min remaining for this device.`;
+            showToast(`Cooldown: ${remain} minutes`, true);
             return;
         }
         processLinkvertiseTask();
     });
     
-    // initial setup
     function init() {
-        activeKey = null;
-        keyExpiryTime = null;
-        cooldownUntil = null;
-        selectedHours = 3;
-        resetDoubleTaskState();
-        stopTimerInterval();
+        const now = Date.now();
+        if (activeKey && keyExpiryTime && now >= keyExpiryTime && !cooldownUntil) {
+            cooldownUntil = now + 10 * 60 * 1000;
+            activeKey = null;
+            keyExpiryTime = null;
+            saveAllToStorage();
+        }
+        if (cooldownUntil && now >= cooldownUntil && !activeKey) {
+            cooldownUntil = null;
+            saveAllToStorage();
+        }
         refreshUI();
+        stopTimerInterval();
         currentTimerInterval = setInterval(() => refreshUI(), 800);
-        showToast("DEBA Key System Ready | Complete Linkvertise task", false);
+        showToast("Device-locked DEBA system • Click COPY to copy your key", false);
     }
     
     init();
