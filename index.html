@@ -1,0 +1,603 @@
+Here is the complete HTML document with the DEBA-XXXX-XXXX-XXXX key format fully implemented.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>DEBA Key System • Fake Ninja Session Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0c12 0%, #0f111a 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        .generator {
+            max-width: 580px;
+            width: 100%;
+            background: rgba(18, 22, 32, 0.85);
+            backdrop-filter: blur(2px);
+            border-radius: 3rem;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            padding: 2rem 1.8rem 2.2rem;
+            transition: all 0.2s ease;
+        }
+
+        .badge {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+            padding-bottom: 0.75rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.7rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #FFB347, #FF6B3D);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .sub {
+            color: #9aa4bf;
+            font-weight: 500;
+            font-size: 0.85rem;
+            background: #1e2438;
+            padding: 0.2rem 0.9rem;
+            border-radius: 40px;
+        }
+
+        .key-section {
+            background: #0b0e16;
+            border-radius: 2rem;
+            padding: 1.2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 1px solid #2a2f42;
+            box-shadow: inset 0 1px 3px #00000030, 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .key-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 600;
+            color: #7f89ae;
+            margin-bottom: 0.7rem;
+        }
+
+        #generatedKey {
+            background: #00000066;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 0.8rem 0.5rem;
+            border-radius: 2rem;
+            color: #f5c542;
+            text-shadow: 0 0 4px #ffb34780;
+            word-break: break-all;
+            border: 1px solid #3e3f5e;
+            margin-bottom: 0.75rem;
+        }
+
+        .key-placeholder {
+            color: #4c5270;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .duration-panel {
+            margin: 1.8rem 0 1.4rem;
+        }
+
+        .duration-title {
+            font-weight: 600;
+            color: #cdd5f0;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .duration-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dur-btn {
+            flex: 1;
+            background: #13182b;
+            border: 1px solid #2e3650;
+            padding: 0.85rem 0;
+            border-radius: 2rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #b9c3ec;
+            text-align: center;
+        }
+
+        .dur-btn.active {
+            background: linear-gradient(105deg, #ff9142, #ff5e2c);
+            border-color: #ffb069;
+            color: white;
+            box-shadow: 0 4px 14px #ff5e2c60;
+        }
+
+        .task-area {
+            background: #10131f;
+            border-radius: 1.6rem;
+            padding: 1.2rem 1.2rem;
+            margin: 1.8rem 0;
+            border-left: 4px solid #ff9142;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .task-desc {
+            color: #b9c2e0;
+            font-size: 0.85rem;
+        }
+
+        .verify-btn {
+            background: #2b334f;
+            width: 100%;
+            padding: 0.9rem;
+            border-radius: 3rem;
+            font-weight: bold;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            color: white;
+        }
+
+        .verify-btn.active-verify {
+            background: #ff9142;
+            box-shadow: 0 5px 12px #ff914280;
+            cursor: pointer;
+        }
+
+        .verify-btn.disabled-verify {
+            background: #2a2f44;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .timer-wrapper {
+            background: #080b12;
+            border-radius: 2rem;
+            text-align: center;
+            padding: 0.8rem;
+            margin: 1rem 0 1.2rem;
+        }
+
+        #countdownDisplay {
+            font-family: monospace;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: #ffbc6e;
+        }
+
+        .cooldown-message {
+            font-size: 0.75rem;
+            color: #a8b2d1;
+        }
+
+        .rules {
+            margin-top: 1.6rem;
+            background: #0c0f1a60;
+            border-radius: 1.4rem;
+            padding: 1rem;
+            font-size: 0.7rem;
+            color: #8e98bf;
+            border-top: 1px solid #232842;
+        }
+
+        .rules ul {
+            padding-left: 1.2rem;
+            margin-top: 6px;
+        }
+
+        button {
+            background: none;
+            border: none;
+            font-family: inherit;
+        }
+
+        hr {
+            border-color: #242a3f;
+            margin: 10px 0;
+        }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e2a3a;
+            color: #ffd966;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            z-index: 999;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .generator { padding: 1.4rem; }
+            #generatedKey { font-size: 1rem; letter-spacing: 0px; }
+            .toast-msg { font-size: 0.7rem; white-space: normal; width: 90%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="generator">
+    <div class="badge">
+        <span class="logo">⚔️ DEBA · NINJA</span>
+        <span class="sub">KEY SYSTEM</span>
+    </div>
+
+    <!-- KEY OUTPUT (DEBA format) -->
+    <div class="key-section">
+        <div class="key-label">🔑 DEBA ACTIVATION KEY</div>
+        <div id="generatedKey">DEBA-XXXX-XXXX-XXXX</div>
+        <div class="key-placeholder" id="keyStatusMsg">Complete task → get DEBA key</div>
+    </div>
+
+    <!-- session duration -->
+    <div class="duration-panel">
+        <div class="duration-title">⚡ SESSION DURATION</div>
+        <div class="duration-buttons">
+            <div class="dur-btn" data-hours="3">3 HOURS (1 task)</div>
+            <div class="dur-btn" data-hours="6">6 HOURS (2 tasks)</div>
+        </div>
+    </div>
+
+    <!-- LINKVERTISE TASK (simulated) -->
+    <div class="task-area">
+        <div class="task-header">
+            <span>📢 LINKVERTISE GATEWAY</span>
+            <span>✔️ mandatory</span>
+        </div>
+        <div class="task-desc">
+            ▶ Complete required task(s) to unlock a DEBA key.<br>
+            <span style="font-size:0.7rem;">* 3h = 1 task | 6h = 2 tasks (sequential)</span>
+        </div>
+        <button id="completeTaskBtn" class="verify-btn active-verify">
+            ✅ COMPLETE & GET DEBA KEY
+        </button>
+    </div>
+
+    <!-- timer / session info -->
+    <div class="timer-wrapper">
+        <div id="countdownDisplay">--:--:--</div>
+        <div class="cooldown-message" id="timerDesc">No active session</div>
+    </div>
+
+    <div id="warningMessage" style="color:#ffaa66; font-size:0.75rem; text-align:center; margin-top: -0.4rem; margin-bottom: 0.5rem;"></div>
+
+    <div class="rules">
+        <strong>📜 RULES — DEBA SESSION</strong>
+        <ul>
+            <li>Key format: <strong>DEBA-XXXX-XXXX-XXXX</strong> (unique per session).</li>
+            <li>Valid for <strong>3h (1 task)</strong> or <strong>6h (2 tasks)</strong>.</li>
+            <li>1 key = 1 device — cannot be transferred.</li>
+            <li>While key ACTIVE → generation locked.</li>
+            <li>After expiry → <strong>10 min cooldown</strong> before new key.</li>
+            <li>Linkvertise task completion is mandatory.</li>
+        </ul>
+    </div>
+</div>
+<div id="toastMsg" class="toast-msg"></div>
+
+<script>
+    // ------------------- STATE (fully respects cooldown + DEBA format) ----------------
+    let activeKey = null;            // current DEBA-xxxx key
+    let keyExpiryTime = null;        // timestamp ms
+    let cooldownUntil = null;        // timestamp ms (expiry+10min)
+    let selectedHours = 3;           // default 3h
+    let currentTimerInterval = null;
+    
+    // DOM elements
+    const keyDisplayDiv = document.getElementById('generatedKey');
+    const keyStatusMsgSpan = document.getElementById('keyStatusMsg');
+    const countdownDisplay = document.getElementById('countdownDisplay');
+    const timerDescSpan = document.getElementById('timerDesc');
+    const warningDiv = document.getElementById('warningMessage');
+    const completeTaskBtn = document.getElementById('completeTaskBtn');
+    const durBtns = document.querySelectorAll('.dur-btn');
+    const toastEl = document.getElementById('toastMsg');
+    
+    function showToast(msg, isError = false) {
+        toastEl.style.backgroundColor = isError ? '#5a2a2a' : '#1e3a3a';
+        toastEl.style.color = '#ffecb3';
+        toastEl.innerText = msg;
+        toastEl.style.opacity = '1';
+        setTimeout(() => { toastEl.style.opacity = '0'; }, 2200);
+    }
+    
+    function stopTimerInterval() {
+        if (currentTimerInterval) {
+            clearInterval(currentTimerInterval);
+            currentTimerInterval = null;
+        }
+    }
+    
+    function formatTimeLeft(msLeft) {
+        if (msLeft <= 0) return "00:00:00";
+        const totalSeconds = Math.floor(msLeft / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }
+    
+    // ---------- DEBA KEY GENERATOR (exactly DEBA-XXXX-XXXX-XXXX) ----------
+    function generateDebaKey() {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
+        let segments = [];
+        for (let s = 0; s < 3; s++) {        // 3 segments after DEBA-
+            let segment = "";
+            for (let i = 0; i < 4; i++) {
+                segment += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            segments.push(segment);
+        }
+        return `DEBA-${segments[0]}-${segments[1]}-${segments[2]}`;
+    }
+    // ---------------------------------------------------------------------
+    
+    function refreshUI() {
+        const now = Date.now();
+        let isKeyActive = (activeKey !== null && keyExpiryTime !== null && now < keyExpiryTime);
+        let isCooldown = (cooldownUntil !== null && now < cooldownUntil);
+        let canGenerate = (!isKeyActive && !isCooldown);
+        
+        // KEY display & messages
+        if (isKeyActive && activeKey) {
+            keyDisplayDiv.innerText = activeKey;
+            keyStatusMsgSpan.innerText = `✅ ACTIVE until ${new Date(keyExpiryTime).toLocaleTimeString()}`;
+            keyDisplayDiv.style.opacity = "1";
+        } else {
+            if (isCooldown) {
+                keyDisplayDiv.innerText = "⏳ COOLDOWN";
+                keyStatusMsgSpan.innerText = `Cooldown: ${Math.ceil((cooldownUntil - now)/60000)} min left`;
+                keyDisplayDiv.style.opacity = "0.7";
+            } else {
+                keyDisplayDiv.innerText = "DEBA-XXXX-XXXX-XXXX";
+                keyStatusMsgSpan.innerText = "Choose duration & complete Linkvertise task";
+                keyDisplayDiv.style.opacity = "1";
+            }
+            if (!isKeyActive && activeKey && keyExpiryTime && now >= keyExpiryTime && !isCooldown) {
+                // fallback consistency
+                keyStatusMsgSpan.innerText = "Key expired. Cooldown started.";
+            }
+        }
+        
+        // Timer display
+        if (isKeyActive && keyExpiryTime) {
+            const remaining = keyExpiryTime - now;
+            countdownDisplay.innerText = formatTimeLeft(remaining > 0 ? remaining : 0);
+            timerDescSpan.innerText = "🔓 Session active — key valid";
+        } else if (isCooldown && cooldownUntil) {
+            const cdRem = cooldownUntil - now;
+            countdownDisplay.innerText = formatTimeLeft(cdRem > 0 ? cdRem : 0);
+            timerDescSpan.innerText = "⛔ COOLDOWN (10 min after expiry)";
+        } else {
+            countdownDisplay.innerText = "--:--:--";
+            timerDescSpan.innerText = "⚡ Ready for new DEBA key";
+        }
+        
+        // Button / warning logic
+        if (canGenerate) {
+            completeTaskBtn.classList.add("active-verify");
+            completeTaskBtn.classList.remove("disabled-verify");
+            completeTaskBtn.disabled = false;
+            warningDiv.innerText = "";
+        } else {
+            completeTaskBtn.classList.remove("active-verify");
+            completeTaskBtn.classList.add("disabled-verify");
+            completeTaskBtn.disabled = true;
+            if (isKeyActive) warningDiv.innerText = "❌ Active key running. Wait until expiry & cooldown ends.";
+            else if (isCooldown) warningDiv.innerText = "❌ Cooldown active (10min). Please wait before generating new key.";
+            else warningDiv.innerText = "❌ Cannot generate new key right now.";
+        }
+        
+        // highlight active duration button — only if not blocked
+        durBtns.forEach(btn => {
+            const hoursVal = parseInt(btn.getAttribute('data-hours'), 10);
+            if (hoursVal === selectedHours) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+    }
+    
+    // start new key session (DEBA)
+    function activateNewKey(hours) {
+        const now = Date.now();
+        const expiry = now + (hours * 60 * 60 * 1000);
+        const newKey = generateDebaKey();          // DEBA format !
+        activeKey = newKey;
+        keyExpiryTime = expiry;
+        cooldownUntil = null;                      // clear any previous cooldown
+        stopTimerInterval();
+        
+        // refresh timer each second
+        currentTimerInterval = setInterval(() => {
+            refreshUI();
+            const nowMs = Date.now();
+            // handle auto-expiry and cooldown transition
+            if (activeKey && keyExpiryTime && nowMs >= keyExpiryTime) {
+                if (cooldownUntil === null) {
+                    cooldownUntil = nowMs + (10 * 60 * 1000);   // 10 min cooldown after expiry
+                }
+                activeKey = null;
+                keyExpiryTime = null;
+                refreshUI();
+            }
+            if (cooldownUntil && Date.now() >= cooldownUntil && !activeKey) {
+                cooldownUntil = null;
+                refreshUI();
+            }
+            refreshUI();
+        }, 500);
+        
+        refreshUI();
+        showToast(`🎉 DEBA key generated! Valid for ${hours} hours.`, false);
+    }
+    
+    // Task & session logic: handles 1-task (3h) or 2-task (6h) flow exactly like original.
+    let pendingSixHourStep = { active: false, step: 0 };   // internal for 6h double task
+    
+    function processLinkvertiseTask() {
+        const now = Date.now();
+        const isKeyActive = (activeKey !== null && keyExpiryTime !== null && now < keyExpiryTime);
+        const isCooldownActive = (cooldownUntil !== null && now < cooldownUntil);
+        
+        if (isKeyActive) {
+            warningDiv.innerText = "You already have an active DEBA key. Wait until expiry + cooldown.";
+            refreshUI();
+            showToast("Active key running. Cannot generate new key.", true);
+            return false;
+        }
+        if (isCooldownActive) {
+            const remainMin = Math.ceil((cooldownUntil - now)/60000);
+            warningDiv.innerText = `Cooldown active: ${remainMin} minutes remaining.`;
+            showToast(`Cooldown: ${remainMin} min left.`, true);
+            refreshUI();
+            return false;
+        }
+        
+        // 6h double-task logic
+        if (selectedHours === 6) {
+            if (!pendingSixHourStep.active) {
+                pendingSixHourStep.active = true;
+                pendingSixHourStep.step = 1;
+                warningDiv.innerText = "🔁 6H MODE: First task completed! You need ONE MORE verification for 6h key.";
+                showToast("✔️ First Linkvertise task done. Complete second task to unlock 6h DEBA key.", false);
+                refreshUI();
+                return false;
+            } else if (pendingSixHourStep.active && pendingSixHourStep.step === 1) {
+                // second task -> generate 6h key
+                activateNewKey(6);
+                pendingSixHourStep.active = false;
+                pendingSixHourStep.step = 0;
+                return true;
+            }
+        } 
+        else if (selectedHours === 3) {
+            // 3h -> single task completes directly
+            activateNewKey(3);
+            return true;
+        }
+        return false;
+    }
+    
+    // reset double task state when duration changes if needed
+    function resetDoubleTaskState() {
+        pendingSixHourStep.active = false;
+        pendingSixHourStep.step = 0;
+    }
+    
+    function setDuration(hours) {
+        const now = Date.now();
+        const isKeyActive = (activeKey !== null && keyExpiryTime !== null && now < keyExpiryTime);
+        const isCooldown = (cooldownUntil !== null && now < cooldownUntil);
+        if (isKeyActive || isCooldown) {
+            warningDiv.innerText = isKeyActive ? "Cannot change duration while key is active." : "Cannot change during cooldown.";
+            refreshUI();
+            return false;
+        }
+        selectedHours = hours;
+        resetDoubleTaskState();
+        refreshUI();
+        warningDiv.innerText = "";
+        showToast(`Duration set to ${hours} hours. Complete task to get DEBA key.`, false);
+        return true;
+    }
+    
+    // Event listeners
+    durBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const hoursVal = parseInt(btn.getAttribute('data-hours'), 10);
+            setDuration(hoursVal);
+        });
+    });
+    
+    completeTaskBtn.addEventListener('click', () => {
+        const now = Date.now();
+        const activeNow = (activeKey !== null && keyExpiryTime !== null && now < keyExpiryTime);
+        const cooldownNow = (cooldownUntil !== null && now < cooldownUntil);
+        if (activeNow) {
+            warningDiv.innerText = "Active key exists – wait for expiry + cooldown.";
+            refreshUI();
+            showToast("Active session in progress.", true);
+            return;
+        }
+        if (cooldownNow) {
+            const remain = Math.ceil((cooldownUntil - now)/60000);
+            warningDiv.innerText = `Cooldown ${remain} min remaining.`;
+            refreshUI();
+            showToast(`Cooldown: ${remain} minute(s)`, true);
+            return;
+        }
+        processLinkvertiseTask();
+    });
+    
+    // initial setup
+    function init() {
+        activeKey = null;
+        keyExpiryTime = null;
+        cooldownUntil = null;
+        selectedHours = 3;
+        resetDoubleTaskState();
+        stopTimerInterval();
+        refreshUI();
+        currentTimerInterval = setInterval(() => refreshUI(), 800);
+        showToast("DEBA Key System Ready | Complete Linkvertise task", false);
+    }
+    
+    init();
+</script>
+</body>
+</html>
+```
