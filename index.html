@@ -1,860 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>DEBA • Material Design • One-Time Keys + Firebase</title>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-    <!-- Material Icons & Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #121212;
-            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1rem;
-        }
-
-        /* Material Surface */
-        .material-surface {
-            max-width: 720px;
-            width: 100%;
-            background: #1E1E1E;
-            border-radius: 28px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.05);
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Material App Bar */
-        .material-appbar {
-            padding: 1rem 1.5rem;
-            background: #1E1E1E;
-            border-bottom: 1px solid #2C2C2C;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .logo-icon {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #FFB347, #FF6B3D);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .logo-text {
-            font-weight: 700;
-            font-size: 1.4rem;
-            background: linear-gradient(135deg, #FFB347, #FF6B3D);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .material-chip {
-            background: #2C2C2C;
-            padding: 0.25rem 1rem;
-            border-radius: 32px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #FFB347;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        /* Material Card */
-        .material-card {
-            background: #2C2C2C;
-            border-radius: 20px;
-            margin: 1rem 1.5rem;
-            padding: 1.25rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .material-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .device-info-row {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
-            color: #B0B0B0;
-            flex-wrap: wrap;
-        }
-
-        .material-icon {
-            font-size: 1.25rem;
-            vertical-align: middle;
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-
-        .device-fingerprint {
-            font-family: 'SF Mono', monospace;
-            font-size: 0.7rem;
-            background: #1E1E1E;
-            padding: 0.25rem 0.75rem;
-            border-radius: 16px;
-            color: #FFB347;
-        }
-
-        /* Key Section */
-        .key-section {
-            background: #252525;
-            border-radius: 20px;
-            margin: 0 1.5rem 1rem;
-            padding: 1.5rem;
-            text-align: center;
-        }
-
-        .key-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #888888;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.3rem;
-        }
-
-        /* Material Text Field style for key */
-        .key-container {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            background: #1E1E1E;
-            border-radius: 16px;
-            border: 2px solid #3C3C3C;
-            padding: 0.25rem 0.25rem 0.25rem 1rem;
-            margin-bottom: 0.75rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .key-container:focus-within {
-            border-color: #FF9142;
-            box-shadow: 0 0 0 3px rgba(255, 145, 66, 0.2);
-        }
-
-        #generatedKey {
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 26px;
-            font-weight: 700;
-            background: transparent;
-            border: none;
-            color: #FFB347;
-            flex: 1;
-            text-align: left;
-            word-break: break-all;
-            outline: none;
-        }
-
-        /* Material Button */
-        .material-button {
-            background: #3C3C3C;
-            border: none;
-            color: #E0E0E0;
-            padding: 0.5rem 1.25rem;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .material-button-primary {
-            background: linear-gradient(105deg, #FF9142, #FF5E2C);
-            color: white;
-        }
-
-        .material-button-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 94, 44, 0.4);
-        }
-
-        .material-button:hover {
-            background: #4A4A4A;
-            transform: translateY(-1px);
-        }
-
-        .material-button:active {
-            transform: translateY(0);
-        }
-
-        /* Duration Segmented Control */
-        .segmented-control {
-            display: flex;
-            gap: 0.75rem;
-            margin: 1rem 1.5rem;
-        }
-
-        .segment {
-            flex: 1;
-            background: #2C2C2C;
-            padding: 0.75rem;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            color: #B0B0B0;
-            transition: all 0.2s;
-            font-size: 0.85rem;
-        }
-
-        .segment.active {
-            background: linear-gradient(105deg, #FF9142, #FF5E2C);
-            color: white;
-            box-shadow: 0 2px 8px rgba(255, 145, 66, 0.3);
-        }
-
-        /* Task Area */
-        .task-card {
-            background: linear-gradient(135deg, #2A2A2A, #252525);
-            border-radius: 20px;
-            margin: 0 1.5rem 1rem;
-            padding: 1.25rem;
-            border-left: 4px solid #FF9142;
-        }
-
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .task-title {
-            font-weight: 600;
-            color: #E0E0E0;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .task-desc {
-            color: #A0A0A0;
-            font-size: 0.8rem;
-            margin: 0.5rem 0;
-        }
-
-        .verify-btn {
-            width: 100%;
-            padding: 0.875rem;
-            border-radius: 40px;
-            font-weight: 700;
-            margin-top: 0.75rem;
-            border: none;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-        }
-
-        /* Timer */
-        .timer-card {
-            background: #252525;
-            border-radius: 20px;
-            text-align: center;
-            padding: 1rem;
-            margin: 0 1.5rem 1rem;
-        }
-
-        #countdownDisplay {
-            font-family: 'SF Mono', monospace;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #FFB347;
-            letter-spacing: 2px;
-        }
-
-        /* Snackbar */
-        .material-snackbar {
-            position: fixed;
-            bottom: 1rem;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #333333;
-            color: #FFD966;
-            padding: 0.75rem 1.5rem;
-            border-radius: 100px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            z-index: 1000;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .material-snackbar.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* Rules Section */
-        .rules-section {
-            background: #252525;
-            border-radius: 20px;
-            margin: 1rem 1.5rem 1.5rem;
-            padding: 1rem;
-            font-size: 0.7rem;
-            color: #888888;
-        }
-
-        .rules-section ul {
-            margin-left: 1.25rem;
-            margin-top: 0.5rem;
-        }
-
-        .rules-section li {
-            margin: 0.35rem 0;
-        }
-
-        .firebase-badge {
-            background: #1E1E1E;
-            padding: 0.25rem 0.75rem;
-            border-radius: 16px;
-            font-size: 0.65rem;
-            color: #4CAF50;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .warning-text {
-            color: #FFAA66;
-            font-size: 0.7rem;
-            text-align: center;
-            margin: 0.5rem 1.5rem;
-        }
-
-        @media (max-width: 550px) {
-            #generatedKey { font-size: 20px; }
-            .material-appbar { padding: 0.75rem 1rem; }
-            .material-card, .key-section, .task-card, .timer-card { margin-left: 1rem; margin-right: 1rem; }
-            .segmented-control { margin-left: 1rem; margin-right: 1rem; }
-            .logo-text { font-size: 1rem; }
-        }
-
-        @media (max-width: 400px) {
-            #generatedKey { font-size: 16px; }
-        }
-
-        .status-badge {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
-            background: #1E1E1E;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: radial-gradient(circle at 30% 20%, #1b0e2e, #05010a 70%);
+    color: #e8e6ff;
+  }
+  .card {
+    width: 100%;
+    max-width: 360px;
+    padding: 32px 28px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  }
+  h1 {
+    margin: 0 0 6px;
+    font-size: 22px;
+    text-align: center;
+    background: linear-gradient(90deg, #7f5af0, #2cb67d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  p.sub {
+    text-align: center;
+    font-size: 12px;
+    color: #9a94b8;
+    margin: 0 0 24px;
+  }
+  label {
+    font-size: 12px;
+    color: #b8b3d6;
+    display: block;
+    margin-bottom: 6px;
+  }
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+  }
+  input:focus { border-color: #7f5af0; }
+  input[readonly] { color: #8a84ad; }
+  button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #7f5af0, #2cb67d);
+    color: #05010a;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .msg {
+    margin-top: 14px;
+    font-size: 13px;
+    text-align: center;
+    min-height: 18px;
+  }
+  .msg.error { color: #ff6b6b; }
+  .msg.success { color: #2cb67d; }
+  .link {
+    text-align: center;
+    margin-top: 18px;
+    font-size: 12px;
+  }
+  .link a { color: #7f5af0; text-decoration: none; }
+</style>
 </head>
 <body>
+  <div class="card">
+    <h1>Sign In</h1>
+    <p class="sub">Enter your username to continue</p>
 
-<div class="material-surface">
-    <!-- Material App Bar -->
-    <div class="material-appbar">
-        <div class="logo">
-            <span class="material-symbols-outlined logo-icon">secure</span>
-            <span class="logo-text">DEBA • ONE-TIME KEYS</span>
-        </div>
-        <div class="material-chip">
-            <span class="material-symbols-outlined" style="font-size: 1rem;">cloud</span>
-            Firebase Secure
-        </div>
-    </div>
+    <form id="loginForm">
+      <label for="username">Username</label>
+      <input type="text" id="username" autocomplete="username" required maxlength="32" placeholder="your_username">
 
-    <!-- Device Info Card -->
-    <div class="material-card">
-        <div class="material-card-header">
-            <div class="device-info-row">
-                <span class="material-symbols-outlined material-icon">android</span>
-                <span>Android Device</span>
-            </div>
-            <span class="device-fingerprint" id="deviceShortId">-</span>
-        </div>
-        <div class="device-info-row" style="margin-bottom: 0.5rem;">
-            <span class="material-symbols-outlined material-icon">fingerprint</span>
-            <span>Android ID: <strong id="androidIdValue">-</strong></span>
-        </div>
-        <div class="firebase-badge" id="firebaseStatus">
-            <span class="material-symbols-outlined" style="font-size: 0.8rem;">sync</span>
-            Connecting...
-        </div>
-    </div>
+      <label for="deviceId">Device ID</label>
+      <input type="text" id="deviceId" readonly>
 
-    <!-- Key Display Section -->
-    <div class="key-section">
-        <div class="key-label">
-            <span class="material-symbols-outlined">vpn_key</span>
-            ONE-TIME KEY (SERVER VALIDATED)
-        </div>
-        <div class="key-container">
-            <div id="generatedKey" contenteditable="false">DEBA-XXXX-XXXX-XXXX</div>
-            <button id="copyKeyBtn" class="material-button">
-                <span class="material-symbols-outlined" style="font-size: 1.1rem;">content_copy</span>
-                COPY
-            </button>
-        </div>
-        <div class="key-placeholder" id="keyStatusMsg" style="font-size: 0.7rem; color: #888;">Keys stored in Firebase • Cannot be reused</div>
-        <div id="usedKeyWarning" class="status-badge" style="display:none; margin-top: 8px; background: #4A2A2A; color: #FFAA88;">⚠️ This key was already used/redeemed!</div>
-    </div>
+      <button type="submit" id="submitBtn">Login</button>
+      <div class="msg" id="msg"></div>
+    </form>
 
-    <!-- Duration Segmented Control -->
-    <div class="segmented-control">
-        <div class="segment" data-hours="3">3 HOURS</div>
-        <div class="segment" data-hours="6">6 HOURS</div>
-    </div>
-
-    <!-- Task Card -->
-    <div class="task-card">
-        <div class="task-header">
-            <div class="task-title">
-                <span class="material-symbols-outlined">assignment</span>
-                LINKVERTISE TASK
-            </div>
-            <span class="firebase-badge">
-                <span class="material-symbols-outlined" style="font-size: 0.7rem;">verified</span>
-                Firebase Secure
-            </span>
-        </div>
-        <div class="task-desc">
-            ▶ Complete task → server-generated one‑time key (cannot be reused)
-        </div>
-        <button id="completeTaskBtn" class="material-button material-button-primary verify-btn">
-            <span class="material-symbols-outlined">check_circle</span>
-            COMPLETE & GET ONE‑TIME KEY
-        </button>
-    </div>
-
-    <!-- Timer Card -->
-    <div class="timer-card">
-        <div id="countdownDisplay">--:--:--</div>
-        <div style="font-size: 0.7rem; margin-top: 8px; color: #888;">
-            <span class="material-symbols-outlined" style="font-size: 0.8rem;">schedule</span>
-            Session + key usage tracking
-        </div>
-    </div>
-
-    <div id="warningMessage" class="warning-text"></div>
-
-    <!-- Rules Section -->
-    <div class="rules-section">
-        <strong style="color: #FFB347;">⚡ FIREBASE-POWERED SECURITY</strong>
-        <ul>
-            <li>🔑 Keys stored in <strong>Firebase Realtime Database</strong> — server-side validation</li>
-            <li>🧠 Device auto-detect: Android ID (persistent fingerprint)</li>
-            <li>⛔ Key blacklist: used/expired keys banned globally in Firebase</li>
-            <li>🕒 3h (1 task) / 6h (2 tasks). Cooldown 10min after key expires</li>
-            <li>📋 Copy button + Firebase sync prevents replay attacks across devices</li>
-            <li>🚫 Cross-device key reuse automatically blocked by database rules</li>
-        </ul>
-    </div>
-</div>
-
-<div id="toastMsg" class="material-snackbar">
-    <span class="material-symbols-outlined">info</span>
-    <span id="toastText"></span>
-</div>
+    <div class="link">No account? <a href="register.html">Register</a></div>
+  </div>
 
 <script>
-    // ==================== FIREBASE CONFIGURATION ====================
-    // NOTE: Replace with your own Firebase project config for production
-    const firebaseConfig = {
-        apiKey: "AIzaSyA-CH1DBok4_1iNcCfcCVzyT33_A4dfo9A",
-        authDomain: "fakelag-1a34c.firebaseapp.com",
-        projectId: "fakelag-1a34c",
-        storageBucket: "fakelag-1a34c.firebasestorage.app",
-        messagingSenderId: "699773339301",
-        appId: "1:699773339301:web:1b8da2b45d64a06b08ef4c",
-        measurementId: "G-YJQK9E6B55"
-    };
-    
-    let database = null;
-    let firebaseReady = false;
-    
+  // Config: point this at your deployed API base URL
+  const API_BASE = window.API_BASE || "https://dn-key-server-store.vercel.app";
+
+  function getDeviceId() {
+    let id = localStorage.getItem("device_id");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("device_id", id);
+    }
+    return id;
+  }
+
+  document.getElementById("deviceId").value = getDeviceId();
+
+  const form = document.getElementById("loginForm");
+  const msg = document.getElementById("msg");
+  const submitBtn = document.getElementById("submitBtn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.textContent = "";
+    msg.className = "msg";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Signing in...";
+
+    const username = document.getElementById("username").value.trim();
+    const device_id = document.getElementById("deviceId").value;
+
     try {
-        firebase.initializeApp(firebaseConfig);
-        database = firebase.database();
-        firebaseReady = true;
-        const fbStatus = document.getElementById('firebaseStatus');
-        fbStatus.innerHTML = '<span class="material-symbols-outlined" style="font-size: 0.8rem;">check_circle</span> Firebase connected • Secure validation active';
-        fbStatus.style.color = '#4CAF50';
-    } catch (e) {
-        console.error("Firebase init error:", e);
-        const fbStatus = document.getElementById('firebaseStatus');
-        fbStatus.innerHTML = '<span class="material-symbols-outlined" style="font-size: 0.8rem;">warning</span> Firebase config required • Using local fallback';
-        fbStatus.style.color = '#FFAA66';
+      const res = await fetch(`${API_BASE}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, device_id })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        msg.textContent = data.detail || "Login failed";
+        msg.classList.add("error");
+      } else {
+        msg.textContent = "Login successful";
+        msg.classList.add("success");
+        localStorage.setItem("session_token", data.session_token);
+        localStorage.setItem("username", username);
+        // window.location.href = "dashboard.html";
+      }
+    } catch (err) {
+      msg.textContent = "Network error. Try again.";
+      msg.classList.add("error");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Login";
     }
-    
-    // ================== DEVICE FINGERPRINT ==================
-    function generateAndroidId() {
-        const nav = navigator;
-        const screenRes = `${screen.width}x${screen.height}x${screen.colorDepth}`;
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const language = nav.language;
-        const platform = nav.platform;
-        const hardwareConcurrency = nav.hardwareConcurrency || 'unknown';
-        const deviceMemory = nav.deviceMemory || 'unknown';
-        const userAgent = nav.userAgent;
-        
-        const fingerprint = `${platform}|${screenRes}|${timezone}|${language}|${hardwareConcurrency}|${deviceMemory}|${userAgent.substring(0, 80)}`;
-        
-        let hash = 0;
-        for (let i = 0; i < fingerprint.length; i++) {
-            hash = ((hash << 5) - hash) + fingerprint.charCodeAt(i);
-            hash |= 0;
-        }
-        const positiveHash = Math.abs(hash);
-        let androidId = positiveHash.toString(16).slice(0, 16).padStart(16, '0').toUpperCase();
-        return androidId;
-    }
-    
-    const DEVICE_ANDROID_ID = generateAndroidId();
-    const DEVICE_UNIQUE_ID = DEVICE_ANDROID_ID;
-    
-    document.getElementById('androidIdValue').innerText = DEVICE_ANDROID_ID;
-    document.getElementById('deviceShortId').innerText = DEVICE_ANDROID_ID.slice(0, 8) + '...' + DEVICE_ANDROID_ID.slice(-4);
-    
-    // ========== STORAGE KEYS ==========
-    const STORAGE = {
-        DEVICE_ID: "deba_oneTime_deviceId",
-        ACTIVE_KEY: "deba_ot_activeKey",
-        KEY_EXPIRY: "deba_ot_expiry",
-        COOLDOWN_UNTIL: "deba_ot_cooldown",
-        SELECTED_HOURS: "deba_ot_hours",
-        PENDING_6H: "deba_ot_pending6h"
-    };
-    
-    let storedDevice = localStorage.getItem(STORAGE.DEVICE_ID);
-    if (!storedDevice) {
-        localStorage.setItem(STORAGE.DEVICE_ID, DEVICE_UNIQUE_ID);
-    } else if (storedDevice !== DEVICE_UNIQUE_ID) {
-        localStorage.clear();
-        localStorage.setItem(STORAGE.DEVICE_ID, DEVICE_UNIQUE_ID);
-        location.reload();
-    }
-    
-    let activeKey = localStorage.getItem(STORAGE.ACTIVE_KEY) || null;
-    let keyExpiryTime = localStorage.getItem(STORAGE.KEY_EXPIRY) ? parseInt(localStorage.getItem(STORAGE.KEY_EXPIRY)) : null;
-    let cooldownUntil = localStorage.getItem(STORAGE.COOLDOWN_UNTIL) ? parseInt(localStorage.getItem(STORAGE.COOLDOWN_UNTIL)) : null;
-    let selectedHours = parseInt(localStorage.getItem(STORAGE.SELECTED_HOURS)) || 3;
-    let pendingSixHourStep = { active: false, step: 0 };
-    const storedPending = localStorage.getItem(STORAGE.PENDING_6H);
-    if (storedPending) try { pendingSixHourStep = JSON.parse(storedPending); } catch(e) {}
-    
-    // DOM elements
-    const keyDisplay = document.getElementById('generatedKey');
-    const keyStatusMsg = document.getElementById('keyStatusMsg');
-    const countdownDisplay = document.getElementById('countdownDisplay');
-    const warningDiv = document.getElementById('warningMessage');
-    const completeBtn = document.getElementById('completeTaskBtn');
-    const copyBtn = document.getElementById('copyKeyBtn');
-    const usedWarningDiv = document.getElementById('usedKeyWarning');
-    const durBtns = document.querySelectorAll('.segment');
-    const toastEl = document.getElementById('toastMsg');
-    const toastText = document.getElementById('toastText');
-    
-    function showToast(msg, isError = false) {
-        toastText.innerText = msg;
-        toastEl.classList.add('show');
-        setTimeout(() => toastEl.classList.remove('show'), 2400);
-    }
-    
-    function saveAll() {
-        if (activeKey) localStorage.setItem(STORAGE.ACTIVE_KEY, activeKey);
-        else localStorage.removeItem(STORAGE.ACTIVE_KEY);
-        if (keyExpiryTime) localStorage.setItem(STORAGE.KEY_EXPIRY, keyExpiryTime);
-        else localStorage.removeItem(STORAGE.KEY_EXPIRY);
-        if (cooldownUntil) localStorage.setItem(STORAGE.COOLDOWN_UNTIL, cooldownUntil);
-        else localStorage.removeItem(STORAGE.COOLDOWN_UNTIL);
-        localStorage.setItem(STORAGE.SELECTED_HOURS, selectedHours);
-        localStorage.setItem(STORAGE.PENDING_6H, JSON.stringify(pendingSixHourStep));
-    }
-    
-    function formatTime(ms) {
-        if (ms <= 0) return "00:00:00";
-        const totalSec = Math.floor(ms / 1000);
-        const h = Math.floor(totalSec / 3600);
-        const m = Math.floor((totalSec % 3600) / 60);
-        const s = totalSec % 60;
-        return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-    }
-    
-    // Firebase functions
-    async function isKeyUsedInFirebase(key) {
-        if (!firebaseReady || !database) return false;
-        try {
-            const snapshot = await database.ref(`usedKeys/${key}`).once('value');
-            return snapshot.exists();
-        } catch (e) {
-            console.warn("Firebase read error:", e);
-            return false;
-        }
-    }
-    
-    async function markKeyUsedInFirebase(key, deviceId, expiryTime) {
-        if (!firebaseReady || !database) return false;
-        try {
-            await database.ref(`usedKeys/${key}`).set({
-                deviceId: deviceId,
-                usedAt: Date.now(),
-                expiryTime: expiryTime,
-                status: 'used'
-            });
-            return true;
-        } catch (e) {
-            console.warn("Firebase write error:", e);
-            return false;
-        }
-    }
-    
-    async function storeKeyInFirebase(key, deviceId, expiryTime, hours) {
-        if (!firebaseReady || !database) return false;
-        try {
-            await database.ref(`activeKeys/${key}`).set({
-                deviceId: deviceId,
-                createdAt: Date.now(),
-                expiryTime: expiryTime,
-                hours: hours,
-                status: 'active'
-            });
-            return true;
-        } catch (e) {
-            console.warn("Firebase store error:", e);
-            return false;
-        }
-    }
-    
-    async function removeActiveKeyFromFirebase(key) {
-        if (!firebaseReady || !database) return;
-        try {
-            await database.ref(`activeKeys/${key}`).remove();
-        } catch(e) { console.warn(e); }
-    }
-    
-    function generateOneTimeKey() {
-        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
-        let parts = [];
-        for (let i = 0; i < 3; i++) {
-            let seg = "";
-            for (let j = 0; j < 4; j++) seg += chars[Math.floor(Math.random() * chars.length)];
-            parts.push(seg);
-        }
-        return `DEBA-${parts[0]}-${parts[1]}-${parts[2]}`;
-    }
-    
-    async function activateOneTimeKey(hours) {
-        let newKey = generateOneTimeKey();
-        let keyExists = await isKeyUsedInFirebase(newKey);
-        while (keyExists) {
-            newKey = generateOneTimeKey();
-            keyExists = await isKeyUsedInFirebase(newKey);
-        }
-        
-        const expiry = Date.now() + (hours * 3600000);
-        activeKey = newKey;
-        keyExpiryTime = expiry;
-        cooldownUntil = null;
-        pendingSixHourStep = { active: false, step: 0 };
-        
-        await storeKeyInFirebase(newKey, DEVICE_UNIQUE_ID, expiry, hours);
-        
-        saveAll();
-        refreshUI();
-        showToast(`🔑 One-time key generated: ${newKey} — valid for ${hours}h`, false);
-    }
-    
-    async function validateAndExpireKey() {
-        if (activeKey && keyExpiryTime && Date.now() >= keyExpiryTime) {
-            const wasUsed = await isKeyUsedInFirebase(activeKey);
-            if (!wasUsed) {
-                await markKeyUsedInFirebase(activeKey, DEVICE_UNIQUE_ID, keyExpiryTime);
-                await removeActiveKeyFromFirebase(activeKey);
-            }
-            if (!cooldownUntil || cooldownUntil < Date.now()) cooldownUntil = Date.now() + 600000;
-            activeKey = null;
-            keyExpiryTime = null;
-            saveAll();
-            refreshUI();
-            return true;
-        }
-        return false;
-    }
-    
-    function refreshUI() {
-        const now = Date.now();
-        let isActive = (activeKey && keyExpiryTime && now < keyExpiryTime);
-        let isCooldown = (cooldownUntil && now < cooldownUntil);
-        let canGenerate = (!isActive && !isCooldown);
-        
-        if (isActive && activeKey) {
-            keyDisplay.innerText = activeKey;
-            keyStatusMsg.innerText = `✅ ONE‑TIME KEY active — expires ${new Date(keyExpiryTime).toLocaleTimeString()}`;
-            usedWarningDiv.style.display = 'none';
-            copyBtn.style.display = 'inline-flex';
-        } 
-        else if (isCooldown) {
-            keyDisplay.innerText = "⏳ COOLDOWN ACTIVE";
-            const remainingMin = Math.ceil((cooldownUntil - now) / 60000);
-            keyStatusMsg.innerText = `Cooldown: ${remainingMin} min — Android ID locked.`;
-            usedWarningDiv.style.display = 'none';
-            copyBtn.style.display = 'none';
-        } 
-        else {
-            keyDisplay.innerText = "DEBA-XXXX-XXXX-XXXX";
-            keyStatusMsg.innerText = "✨ Press 'COMPLETE' to generate a Firebase-secured one‑time key";
-            usedWarningDiv.style.display = 'none';
-            copyBtn.style.display = 'inline-flex';
-        }
-        
-        if (isActive && keyExpiryTime) {
-            const remaining = keyExpiryTime - now;
-            countdownDisplay.innerText = formatTime(remaining > 0 ? remaining : 0);
-        } 
-        else if (isCooldown && cooldownUntil) {
-            const remainingCd = cooldownUntil - now;
-            countdownDisplay.innerText = formatTime(remainingCd > 0 ? remainingCd : 0);
-        } 
-        else {
-            countdownDisplay.innerText = "--:--:--";
-        }
-        
-        if (canGenerate) {
-            completeBtn.disabled = false;
-            completeBtn.style.opacity = '1';
-            if (pendingSixHourStep.active && pendingSixHourStep.step === 1) 
-                warningDiv.innerText = "🔁 6H MODE: 1/2 tasks completed! Complete again to activate 6h key.";
-            else 
-                warningDiv.innerText = "";
-        } else {
-            completeBtn.disabled = true;
-            completeBtn.style.opacity = '0.55';
-            if (isActive) warningDiv.innerText = "❌ One‑time key active. Wait until expiry + cooldown.";
-            else if (isCooldown) warningDiv.innerText = "❌ Cooldown active for this Android ID. Please wait.";
-            else warningDiv.innerText = "❌ Cannot generate new key yet.";
-        }
-        
-        durBtns.forEach(btn => {
-            let h = parseInt(btn.dataset.hours);
-            if (h === selectedHours) btn.classList.add('active');
-            else btn.classList.remove('active');
-        });
-    }
-    
-    async function copyKey() {
-        let txt = keyDisplay.innerText;
-        if (!txt || txt.includes("COOLDOWN") || txt.includes("DEBA-XXXX") || txt === "DEBA-XXXX-XXXX-XXXX") {
-            showToast("No valid key to copy", true);
-            return;
-        }
-        try {
-            await navigator.clipboard.writeText(txt);
-            showToast("✅ One-time key copied to clipboard", false);
-        } catch(e) {
-            showToast("Copy failed", true);
-        }
-    }
-    
-    async function processTask() {
-        const now = Date.now();
-        let isActive = (activeKey && keyExpiryTime && now < keyExpiryTime);
-        let isCooldownActive = (cooldownUntil && now < cooldownUntil);
-        
-        if (isActive || isCooldownActive) {
-            warningDiv.innerText = isActive ? "Active one‑time key in use. Wait for expiry." : "Cooldown in progress, please wait.";
-            showToast(warningDiv.innerText, true);
-            return;
-        }
-        
-        completeBtn.disabled = true;
-        const originalText = completeBtn.innerHTML;
-        completeBtn.innerHTML = '<span class="material-symbols-outlined">progress_activity</span> PROCESSING...';
-        
-        if (selectedHours === 6) {
-            if (!pendingSixHourStep.active) {
-                pendingSixHourStep = { active: true, step: 1 };
-                saveAll();
-                warningDiv.innerText = "🔁 6H MODE: first task verified! Need one more confirmation (2/2).";
-                showToast("6h mode: first task completed. Complete again to get 6h key.", false);
-                refreshUI();
-                completeBtn.innerHTML = originalText;
-                completeBtn.disabled = false;
-                return;
-            } 
-            else if (pendingSixHourStep.active && pendingSixHourStep.step === 1) {
-                await activateOneTimeKey(6);
-                pendingSixHourStep = { active: false, step: 0 };
-                saveAll();
-            }
-        } 
-        else if (selectedHours === 3) {
-            await activateOneTimeKey(3);
-        }
-        
-        completeBtn.innerHTML = originalText;
-        completeBtn.disabled = false;
-    }
-    
-    function setDuration(hours) {
-        const now = Date.now();
-        let isActive = (activeKey && keyExpiryTime && now < keyExpiryTime);
-        let isCooldown = (cooldownUntil && now < cooldownUntil);
-        if (isActive || isCooldown) {
-            showToast("Cannot switch duration while key active or cooldown", true);
-            return;
-        }
-        selectedHours = hours;
-        pendingSixHourStep = { active: false, step: 0 };
-        saveAll();
-        refreshUI();
-        showToast(`Duration set to ${hours} hours (Firebase secure)`, false);
-    }
-    
-    setInterval(async () => {
-        await validateAndExpireKey();
-        refreshUI();
-    }, 1000);
-    
-    copyBtn.addEventListener('click', copyKey);
-    completeBtn.addEventListener('click', processTask);
-    durBtns.forEach(btn => btn.addEventListener('click', () => setDuration(parseInt(btn.dataset.hours))));
-    
-    refreshUI();
-    showToast("🔐 Firebase-secured one-time keys • Material Design", false);
+  });
 </script>
 </body>
 </html>
