@@ -1,169 +1,427 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login</title>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: radial-gradient(circle at 30% 20%, #1b0e2e, #05010a 70%);
-    color: #e8e6ff;
-  }
-  .card {
-    width: 100%;
-    max-width: 360px;
-    padding: 32px 28px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-  }
-  h1 {
-    margin: 0 0 6px;
-    font-size: 22px;
-    text-align: center;
-    background: linear-gradient(90deg, #7f5af0, #2cb67d);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  p.sub {
-    text-align: center;
-    font-size: 12px;
-    color: #9a94b8;
-    margin: 0 0 24px;
-  }
-  label {
-    font-size: 12px;
-    color: #b8b3d6;
-    display: block;
-    margin-bottom: 6px;
-  }
-  input {
-    width: 100%;
-    padding: 12px 14px;
-    margin-bottom: 16px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
-    font-size: 14px;
-    outline: none;
-  }
-  input:focus { border-color: #7f5af0; }
-  input[readonly] { color: #8a84ad; }
-  button {
-    width: 100%;
-    padding: 13px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(90deg, #7f5af0, #2cb67d);
-    color: #05010a;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  .msg {
-    margin-top: 14px;
-    font-size: 13px;
-    text-align: center;
-    min-height: 18px;
-  }
-  .msg.error { color: #ff6b6b; }
-  .msg.success { color: #2cb67d; }
-  .link {
-    text-align: center;
-    margin-top: 18px;
-    font-size: 12px;
-  }
-  .link a { color: #7f5af0; text-decoration: none; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel • Username Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366f1',
+            accent: '#22d3ee',
+            danger: '#ef4444',
+            success: '#22c55e',
+            warning: '#f59e0b',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.4s ease-out',
+            'slide-in': 'slideIn 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(8px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            slideIn: {
+              '0%': { opacity: '0', transform: 'translateX(-10px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #0b1120;
+      min-height: 100vh;
+    }
+    .glass {
+      background: rgba(30, 41, 59, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+    }
+    .input-focus:focus {
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+    }
+    .countdown {
+      font-variant-numeric: tabular-nums;
+    }
+    .toggle-on {
+      background: #22c55e;
+    }
+    .toggle-off {
+      background: #64748b;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #1e293b; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+  </style>
 </head>
-<body>
-  <div class="card">
-    <h1>Sign In</h1>
-    <p class="sub">Enter your username to continue</p>
+<body class="font-sans text-slate-100">
+  <!-- ========== ADMIN LOGIN PANEL ========== -->
+  <div id="loginPanel" class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-sm animate-fade-in">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-purple-600 mb-4 shadow-lg shadow-primary/25">
+          <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold">Admin Access</h1>
+        <p class="text-slate-400 text-sm mt-1">Enter the server secret</p>
+      </div>
 
-    <form id="loginForm">
-      <label for="username">Username</label>
-      <input type="text" id="username" autocomplete="username" required maxlength="32" placeholder="your_username">
-
-      <label for="deviceId">Device ID</label>
-      <input type="text" id="deviceId" readonly>
-
-      <button type="submit" id="submitBtn">Login</button>
-      <div class="msg" id="msg"></div>
-    </form>
-
-    <div class="link">No account? <a href="register.html">Register</a></div>
+      <div class="glass rounded-2xl p-6 shadow-xl">
+        <form id="adminLoginForm" class="space-y-5">
+          <div>
+            <label for="adminPassword" class="block text-sm font-medium text-slate-300 mb-2">Password (ADMIN_SECRET)</label>
+            <input
+              type="password"
+              id="adminPassword"
+              required
+              autocomplete="current-password"
+              placeholder="••••••••••••"
+              class="w-full px-4 py-3 bg-slate-900/70 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-primary input-focus transition"
+            />
+          </div>
+          <button
+            type="submit"
+            id="adminLoginBtn"
+            class="w-full py-3 bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-500 hover:to-primary text-white font-semibold rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            <span id="adminBtnText">Unlock Panel</span>
+            <svg id="adminSpinner" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </button>
+        </form>
+        <div id="loginMessage" class="mt-4 text-center text-sm hidden"></div>
+      </div>
+    </div>
   </div>
 
-<script>
-  // Config: point this at your deployed API base URL
-  const API_BASE = window.API_BASE || "https://dn-key-server-store.vercel.app";
+  <!-- ========== MAIN ADMIN DASHBOARD ========== -->
+  <div id="dashboard" class="hidden min-h-screen flex flex-col">
+    <!-- AppBar -->
+    <header class="sticky top-0 z-40 glass border-b border-slate-700/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-3 justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="font-semibold text-lg leading-tight">Username Manager</h1>
+            <p class="text-xs text-slate-400">Admin Control Panel</p>
+          </div>
+        </div>
 
-  function getDeviceId() {
-    let id = localStorage.getItem("device_id");
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem("device_id", id);
+        <!-- Search -->
+        <div class="flex-1 max-w-md relative">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </span>
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="Search usernames or device..."
+            class="w-full pl-9 pr-4 py-2 bg-slate-900/60 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-primary input-focus transition"
+          />
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="refreshBtn" title="Refresh" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition text-slate-300 hover:text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+          </button>
+          <button id="logoutBtn" class="px-3 py-2 text-sm rounded-lg bg-slate-800 hover:bg-red-900/40 border border-slate-700 hover:border-red-700 text-slate-300 hover:text-red-300 transition">
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
+      <!-- Generator / Create Section -->
+      <section class="glass rounded-2xl p-5 sm:p-6 animate-fade-in">
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Generate / Create Username
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Username -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Username</label>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                id="newUsername"
+                placeholder="auto or type..."
+                class="flex-1 px-3 py-2.5 bg-slate-900/70 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-primary input-focus"
+              />
+              <button type="button" id="autoUsernameBtn" title="Generate random" class="px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-xs font-medium hover:bg-slate-700 transition">
+                Auto
+              </button>
+            </div>
+          </div>
+
+          <!-- Device -->
+          <div>
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Device</label>
+            <select id="deviceSelect" class="w-full px-3 py-2.5 bg-slate-900/70 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-primary input-focus">
+              <option value="1">Device 1</option>
+              <option value="2">Device 2</option>
+              <option value="3">Device 3</option>
+              <option value="4">Device 4</option>
+              <option value="5">Device 5</option>
+              <option value="custom">Custom...</option>
+            </select>
+          </div>
+
+          <!-- Duration -->
+          <div class="md:col-span-2">
+            <label class="block text-xs font-medium text-slate-400 mb-1.5">Duration (Days / Hours / Minutes)</label>
+            <div class="flex gap-2">
+              <div class="flex-1">
+                <input type="number" id="daysInput" min="0" max="365" value="0" placeholder="Days" class="w-full px-3 py-2.5 bg-slate-900/70 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-primary input-focus text-center" />
+                <span class="block text-[10px] text-slate-500 text-center mt-0.5">Days</span>
+              </div>
+              <div class="flex-1">
+                <input type="number" id="hoursInput" min="0" max="23" value="1" placeholder="Hours" class="w-full px-3 py-2.5 bg-slate-900/70 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-primary input-focus text-center" />
+                <span class="block text-[10px] text-slate-500 text-center mt-0.5">Hours</span>
+              </div>
+              <div class="flex-1">
+                <input type="number" id="minutesInput" min="0" max="59" value="0" placeholder="Min" class="w-full px-3 py-2.5 bg-slate-900/70 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-primary input-focus text-center" />
+                <span class="block text-[10px] text-slate-500 text-center mt-0.5">Minutes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button id="createBtn" class="px-5 py-2.5 bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-500 hover:to-primary text-white text-sm font-semibold rounded-xl transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Create Username
+          </button>
+          <span id="createMessage" class="text-sm hidden"></span>
+        </div>
+      </section>
+
+      <!-- Stats + Bulk actions -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-4 text-sm">
+          <span class="text-slate-400">Total: <strong id="totalCount" class="text-white">0</strong></span>
+          <span class="text-slate-400">Active: <strong id="activeCount" class="text-green-400">0</strong></span>
+          <span class="text-slate-400">Banned: <strong id="bannedCount" class="text-red-400">0</strong></span>
+          <span class="text-slate-400">Expired: <strong id="expiredCount" class="text-amber-400">0</strong></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer select-none">
+            <input type="checkbox" id="selectAll" class="rounded border-slate-600 bg-slate-800 text-primary focus:ring-primary" />
+            Select All
+          </label>
+          <button id="bulkDeleteBtn" class="px-3 py-1.5 text-sm rounded-lg bg-red-900/40 border border-red-800/50 text-red-300 hover:bg-red-900/60 transition disabled:opacity-40" disabled>
+            Delete Selected
+          </button>
+        </div>
+      </div>
+
+      <!-- Username List -->
+      <section class="glass rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-slate-700/70 text-left text-xs uppercase tracking-wider text-slate-400">
+                <th class="px-4 py-3 w-10"></th>
+                <th class="px-4 py-3">Username</th>
+                <th class="px-4 py-3">Device</th>
+                <th class="px-4 py-3">Cooldown / Expires</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usernameTableBody" class="divide-y divide-slate-800">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+        <div id="emptyState" class="hidden py-16 text-center text-slate-500">
+          <svg class="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <p>No usernames found</p>
+          <p class="text-xs mt-1">Create one above or adjust your search</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+  <script>
+    // ========== CONFIG ==========
+    const API_BASE = 'https://dn-key-server-store.vercel.app/api';
+    let adminToken = sessionStorage.getItem('admin_token') || null;
+    let usernames = [];
+    let filtered = [];
+    let autoRefreshInterval = null;
+    let countdownInterval = null;
+
+    // ========== Sound Effects ==========
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    return id;
-  }
-
-  document.getElementById("deviceId").value = getDeviceId();
-
-  const form = document.getElementById("loginForm");
-  const msg = document.getElementById("msg");
-  const submitBtn = document.getElementById("submitBtn");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    msg.textContent = "";
-    msg.className = "msg";
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Signing in...";
-
-    const username = document.getElementById("username").value.trim();
-    const device_id = document.getElementById("deviceId").value;
-
-    try {
-      const res = await fetch(`${API_BASE}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, device_id })
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        msg.textContent = data.detail || "Login failed";
-        msg.classList.add("error");
-      } else {
-        msg.textContent = "Login successful";
-        msg.classList.add("success");
-        localStorage.setItem("session_token", data.session_token);
-        localStorage.setItem("username", username);
-        // window.location.href = "dashboard.html";
-      }
-    } catch (err) {
-      msg.textContent = "Network error. Try again.";
-      msg.classList.add("error");
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Login";
+    function playTone(freq, duration = 0.08, type = 'sine', volume = 0.12) {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
     }
-  });
-</script>
-</body>
-</html>
+    function playSuccess() { playTone(523, 0.07); setTimeout(() => playTone(784, 0.1), 70); }
+    function playError() { playTone(180, 0.15, 'sawtooth', 0.1); }
+    function playClick() { playTone(700, 0.04, 'square', 0.07); }
+    function playCopy() { playTone(1100, 0.05); }
+    function playDelete() { playTone(300, 0.08, 'triangle'); setTimeout(() => playTone(200, 0.1, 'triangle'), 80); }
+
+    // ========== Helpers ==========
+    function toast(msg, type = 'info') {
+      const el = document.createElement('div');
+      const colors = {
+        success: 'bg-green-900/90 border-green-700 text-green-100',
+        error: 'bg-red-900/90 border-red-700 text-red-100',
+        info: 'bg-slate-800/95 border-slate-600 text-slate-100'
+      };
+      el.className = `px-4 py-2.5 rounded-xl border text-sm shadow-lg animate-slide-in ${colors[type] || colors.info}`;
+      el.textContent = msg;
+      document.getElementById('toastContainer').appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.3s';
+        setTimeout(() => el.remove(), 300);
+      }, 3200);
+    }
+
+    function formatCountdown(ms) {
+      if (ms <= 0) return 'Expired';
+      const totalSec = Math.floor(ms / 1000);
+      const d = Math.floor(totalSec / 86400);
+      const h = Math.floor((totalSec % 86400) / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+      if (d > 0) return `${d}d ${h}h ${m}m`;
+      if (h > 0) return `${h}h ${m}m ${s}s`;
+      return `${m}m ${s}s`;
+    }
+
+    function generateRandomUsername() {
+      const adjectives = ['swift', 'dark', 'neon', 'cyber', 'shadow', 'nova', 'pixel', 'quantum', 'lunar', 'apex'];
+      const nouns = ['fox', 'wolf', 'byte', 'node', 'spark', 'blade', 'pulse', 'core', 'rift', 'echo'];
+      const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+      const noun = nouns[Math.floor(Math.random() * nouns.length)];
+      const num = Math.floor(Math.random() * 900) + 100;
+      return `${adj}_${noun}${num}`;
+    }
+
+    // ========== Auth ==========
+    const loginPanel = document.getElementById('loginPanel');
+    const dashboard = document.getElementById('dashboard');
+
+    function showDashboard() {
+      loginPanel.classList.add('hidden');
+      dashboard.classList.remove('hidden');
+      fetchUsernames();
+      startAutoRefresh();
+      startCountdownTicker();
+    }
+
+    function showLogin() {
+      dashboard.classList.add('hidden');
+      loginPanel.classList.remove('hidden');
+      adminToken = null;
+      sessionStorage.removeItem('admin_token');
+      stopAutoRefresh();
+      stopCountdownTicker();
+    }
+
+    if (adminToken) {
+      showDashboard();
+    }
+
+    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      playClick();
+      const password = document.getElementById('adminPassword').value;
+      const btn = document.getElementById('adminLoginBtn');
+      const btnText = document.getElementById('adminBtnText');
+      const spinner = document.getElementById('adminSpinner');
+      const msg = document.getElementById('loginMessage');
+
+      btn.disabled = true;
+      btnText.textContent = 'Verifying...';
+      spinner.classList.remove('hidden');
+      msg.classList.add('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok) {
+          playSuccess();
+          adminToken = data.token || 'authenticated';
+          sessionStorage.setItem('admin_token', adminToken);
+          msg.textContent = 'Access granted';
+          msg.className = 'mt-4 text-center text-sm text-green-400';
+          msg.classList.remove('hidden');
+          setTimeout(showDashboard, 600);
+        } else {
+          playError();
+          msg.textContent = data.detail || data.message || 'Invalid password';
+          msg.className = 'mt-4 text-center text-sm text-red-400';
+          msg.classList.remove('hidden');
+        }
+      } catch (err) {
+        playError();
+        // Fallback for demo / offline: accept a demo secret
+        if (password === 'ADMIN_SECRET' || password === 'admin') {
+          playSuccess();
+          adminToken = 'demo-token';
+          sessionStorage.setItem('admin_token', adminToken);
+          msg.textContent = 'Demo mod
